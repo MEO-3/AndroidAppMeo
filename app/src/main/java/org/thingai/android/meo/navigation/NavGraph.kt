@@ -8,7 +8,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import org.thingai.android.meo.navigation.Route
-import org.thingai.android.meo.ui.login.LoginScreen
+import org.thingai.android.meo.ui.screen.LoginScreen
 
 const val ANIM_DURATION = 300
 

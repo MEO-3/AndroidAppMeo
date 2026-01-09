@@ -1,4 +1,4 @@
-package org.thingai.android.meo.ui.login
+package org.thingai.android.meo.ui.screen
 
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
