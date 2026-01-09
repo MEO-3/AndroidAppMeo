@@ -6,9 +6,9 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Lock
-import androidx.compose.material.icons.outlined.Phone
-import androidx.compose.material.icons.outlined.Visibility
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Phone
+import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -82,7 +82,7 @@ fun LoginScreen(
                     shape = MaterialTheme.shapes.large,
                     leadingIcon = {
                         Icon(
-                            imageVector = Icons.Outlined.Phone,
+                            imageVector = Icons.Default.Phone,
                             contentDescription = "phone",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -105,7 +105,7 @@ fun LoginScreen(
                     shape = MaterialTheme.shapes.large,
                     leadingIcon = {
                         Icon(
-                            imageVector = Icons.Outlined.Lock,
+                            imageVector = Icons.Default.Lock,
                             contentDescription = "password",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
@@ -115,19 +115,14 @@ fun LoginScreen(
                     trailingIcon = {
                         IconButton(onClick = { }) {
                             Icon(
-                                imageVector = Icons.Outlined.Visibility,
-                                contentDescription = "Pasword Visibility"
+                                imageVector = Icons.Default.Visibility,
+                                contentDescription = "Password Visibility"
                             )
                         }
                     },
                     keyboardOptions = KeyboardOptions(
                         keyboardType = KeyboardType.Password,
                         imeAction = ImeAction.Done
-                    ),
-                    keyboardActions = KeyboardActions(
-                        onDone = {
-
-                        }
                     )
                 )
 
