@@ -8,6 +8,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Icon
@@ -23,14 +24,21 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import org.thingai.android.meo.ui.viewmodel.VMAuth
 
 @Composable
 fun LoginScreen(
-    navController: NavController
+    navController: NavController,
+    vm: VMAuth = hiltViewModel()
 ) {
+    val uiState = vm.uiState.collectAsStateWithLifecycle().value
+
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -73,8 +81,8 @@ fun LoginScreen(
 
                 // Phone
                 OutlinedTextField(
-                    value = "",
-                    onValueChange = { },
+                    value = uiState.phoneNumber,
+                    onValueChange = { vm.onPhoneNumberChanged(it) },
                     modifier = Modifier
                         .fillMaxWidth(),
                     singleLine = true,
@@ -97,8 +105,8 @@ fun LoginScreen(
 
                 // Password
                 OutlinedTextField(
-                    value = "",
-                    onValueChange = { },
+                    value = uiState.password,
+                    onValueChange = { vm.onPasswordChanged(it) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = MaterialTheme.shapes.large,
@@ -110,11 +118,11 @@ fun LoginScreen(
                         )
                     },
                     placeholder = { Text("Enter password") },
-                    visualTransformation = PasswordVisualTransformation(),
+                    visualTransformation = if (uiState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
                     trailingIcon = {
-                        IconButton(onClick = { }) {
+                        IconButton(onClick = { vm.togglePasswordVisibility() }) {
                             Icon(
-                                imageVector = Icons.Default.Visibility,
+                                imageVector = if (uiState.isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
                                 contentDescription = "Password Visibility"
                             )
                         }
