@@ -1,4 +1,4 @@
-package org.thingai.android.meo.ui.component.dialog
+package org.thingai.android.meo.ui.shared.dialog
 
 import android.view.Gravity
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -9,8 +9,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalView
 import androidx.compose.ui.window.DialogProperties
 import androidx.compose.ui.window.DialogWindowProvider
-import org.thingai.android.meo.ui.component.custom.DialogPosition
-import org.thingai.android.meo.ui.component.custom.DialogPosition.*
+import org.thingai.android.meo.ui.shared.custom.DialogPosition
+import org.thingai.android.meo.ui.shared.custom.DialogPosition.*
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable

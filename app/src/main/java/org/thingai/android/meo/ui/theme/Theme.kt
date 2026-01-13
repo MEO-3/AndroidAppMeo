@@ -329,10 +329,22 @@ fun AndroidMeoTheme(
         else -> lightScheme
     }
 
+    val extendedColorScheme = if (darkTheme) extendedDark else extendedLight
+
     MaterialTheme(
         colorScheme = colorScheme,
         typography = AppTypography,
         content = content,
     )
+
+    ExtendedTheme.setColor(extendedColorScheme)
+
 }
 
+object ExtendedTheme {
+    lateinit var colorScheme: ExtendedColorScheme
+
+    fun setColor(colorScheme: ExtendedColorScheme) {
+        this.colorScheme = colorScheme
+    }
+}

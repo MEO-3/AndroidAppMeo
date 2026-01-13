@@ -1,4 +1,4 @@
-package org.thingai.android.meo.ui.component.dialog
+package org.thingai.android.meo.ui.shared.dialog
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -10,14 +10,15 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.CheckCircle
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Error
 import androidx.compose.material3.Button
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -26,19 +27,18 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import org.thingai.android.meo.ui.component.custom.DialogPosition
+import org.thingai.android.meo.ui.shared.custom.DialogPosition
 
 @Composable
-fun ErrorDialog(
+fun SuccessDialog(
     show: Boolean,
-    title: String = "Error",
+    title: String = "Success",
     message: String? = null,
     position: DialogPosition = DialogPosition.BOTTOM,
-    cancellable: Boolean = true,
+    closeButton: Boolean = false,
     onDismiss: () -> Unit,
-    retryText: String = "Retry",
-    onRetry: (() -> Unit)? = null,
     confirmText: String = "OK",
+    onConfirm: (() -> Unit)? = null,
 ) {
     if (!show) return
 
@@ -51,8 +51,6 @@ fun ErrorDialog(
         modifier = Modifier.padding(8.dp),
         properties = DialogProperties(
             usePlatformDefaultWidth = false,
-            dismissOnBackPress = cancellable,
-            dismissOnClickOutside = cancellable
         ),
     ) {
         Surface(
@@ -100,9 +98,9 @@ fun ErrorDialog(
                     verticalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     Icon(
-                        imageVector = Icons.Filled.Error,
-                        contentDescription = "Error",
-                        tint = MaterialTheme.colorScheme.error,
+                        imageVector = Icons.Filled.CheckCircle,
+                        contentDescription = "Success",
+                        tint = MaterialTheme.colorScheme.primary,
                         modifier = Modifier.size(40.dp)
                     )
                     if (message != null) {
@@ -114,37 +112,36 @@ fun ErrorDialog(
                     }
                 }
 
-                // Actions
+                Spacer(modifier = Modifier.size(4.dp))
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Center
+                    horizontalArrangement = Arrangement.End
                 ) {
-                    if (onRetry != null) {
-                        Button(
-                            onClick = {
-                                focusManager.clearFocus()
-                                keyboardController?.hide()
-                                onRetry()
-                            },
-                            modifier = Modifier.weight(1f)
-                        ) {
-                            Text(retryText)
-                        }
-                    } else {
-                        Button(
+                    if (closeButton) {
+                        TextButton(
+                            modifier = Modifier.weight(1f),
                             onClick = {
                                 focusManager.clearFocus()
                                 keyboardController?.hide()
                                 onDismiss()
-                            },
-                            modifier = Modifier.weight(1f)
+                            }
                         ) {
-                            Text(confirmText)
+                            Text("Close")
                         }
+                        Spacer(Modifier.size(8.dp))
+                    }
+                    Button(
+                        modifier = Modifier.weight(1f),
+                        onClick = {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
+                            (onConfirm ?: onDismiss).invoke()
+                        }
+                    ) {
+                        Text(confirmText)
                     }
                 }
             }
-
         }
     }
 }

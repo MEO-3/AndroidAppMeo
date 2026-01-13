@@ -74,6 +74,7 @@ dependencies {
     implementation(libs.androidx.compose.material.icons.extended)
 
     implementation(files("../libs/applicationbase.jar"))
+    implementation(files("../libs/meo-common.jar"))
 
     // Room runtime
     implementation(libs.androidx.room.ktx)

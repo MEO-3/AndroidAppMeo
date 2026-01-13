@@ -1,8 +1,8 @@
-package org.thingai.android.meo.ui.component.custom
+package org.thingai.android.meo.ui.shared.custom
 
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.layout.layout
-import org.thingai.android.meo.ui.component.custom.DialogPosition.*
+import org.thingai.android.meo.ui.shared.custom.DialogPosition.*
 
 enum class DialogPosition {
     TOP,

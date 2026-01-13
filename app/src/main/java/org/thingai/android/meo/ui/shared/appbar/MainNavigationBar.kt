@@ -1,4 +1,4 @@
-package org.thingai.android.meo.ui.component.appbar
+package org.thingai.android.meo.ui.shared.appbar
 
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.core.FastOutSlowInEasing
@@ -9,6 +9,7 @@ import androidx.compose.animation.slideInVertically
 import androidx.compose.animation.slideOutVertically
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Analytics
+import androidx.compose.material.icons.filled.Devices
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material3.Icon
@@ -62,15 +63,15 @@ fun MainNavigationBar(
     LaunchedEffect(shouldShow) { visible = shouldShow }
 
     val items = listOf(
-        BottomNavItem(Route.DEVICE, "Thiết bị", Icons.Default.Star, matchRoutes = setOf(
-            Route.DEVICE,
+        BottomNavItem(Route.DEVICE_LIST, "Device", Icons.Default.Devices, matchRoutes = setOf(
+            Route.DEVICE_LIST,
             Route.DEVICE_ADDDEVICE,
             Route.DEVICE_DETAIL,
             Route.DEVICE_INFO,
             Route.DEVICE_SETTING
         )),
-        BottomNavItem(Route.ANALYTICS, "Thống kê", Icons.Default.Analytics),
-        BottomNavItem(Route.SETTING, "Cài đặt", Icons.Default.Settings)
+        BottomNavItem(Route.ANALYTICS, "Analytics", Icons.Default.Analytics),
+        BottomNavItem(Route.SETTING, "Setting", Icons.Default.Settings)
     )
 
     val duration = 220

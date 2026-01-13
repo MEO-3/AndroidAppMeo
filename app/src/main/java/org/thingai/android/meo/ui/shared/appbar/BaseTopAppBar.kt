@@ -1,4 +1,4 @@
-package org.thingai.android.meo.ui.component.appbar
+package org.thingai.android.meo.ui.shared.appbar
 
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.material.icons.Icons

@@ -1,4 +1,4 @@
-package org.thingai.android.meo.ui.component.dialog
+package org.thingai.android.meo.ui.shared.dialog
 
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -24,7 +24,7 @@ import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import org.thingai.android.meo.ui.component.custom.DialogPosition
+import org.thingai.android.meo.ui.shared.custom.DialogPosition
 
 @Composable
 fun LoadingDialog(

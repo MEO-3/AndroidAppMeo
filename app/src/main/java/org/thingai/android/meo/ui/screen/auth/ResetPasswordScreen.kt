@@ -32,7 +32,7 @@ import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
-import org.thingai.android.meo.ui.component.appbar.BaseTopAppBar
+import org.thingai.android.meo.ui.shared.appbar.BaseTopAppBar
 import org.thingai.android.meo.ui.viewmodel.auth.VMResetPassword
 
 @Composable

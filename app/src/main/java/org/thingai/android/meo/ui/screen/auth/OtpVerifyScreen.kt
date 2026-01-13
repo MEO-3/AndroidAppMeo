@@ -18,7 +18,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import org.thingai.android.meo.navigation.Route
-import org.thingai.android.meo.ui.component.appbar.BaseTopAppBar
+import org.thingai.android.meo.ui.shared.appbar.BaseTopAppBar
 import org.thingai.android.meo.ui.viewmodel.auth.VMOtpVerify
 
 @Composable
