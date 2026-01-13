@@ -105,8 +105,8 @@ fun ForgotPasswordScreen(
                     enabled = ui.canSubmit && !ui.isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
-                        .height(56.dp),
-                    shape = MaterialTheme.shapes.extraLarge,
+                        .height(48.dp),
+                    shape = MaterialTheme.shapes.large,
                     colors = ButtonDefaults.filledTonalButtonColors()
                 ) {
                     if (ui.isLoading) {
@@ -116,7 +116,7 @@ fun ForgotPasswordScreen(
                             strokeWidth = 2.dp
                         )
                     } else {
-                        Text("Receive code")
+                        Text("Receive code", fontWeight = FontWeight.Bold)
                     }
                 }
             }

@@ -158,7 +158,7 @@ fun LoginScreen(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
-                    shape = MaterialTheme.shapes.extraLarge,
+                    shape = MaterialTheme.shapes.large,
                     colors = ButtonDefaults.filledTonalButtonColors()
                 ) {
                     Text(
