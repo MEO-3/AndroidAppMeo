@@ -116,7 +116,11 @@ fun ForgotPasswordScreen(
                             strokeWidth = 2.dp
                         )
                     } else {
-                        Text("Receive code", fontWeight = FontWeight.Bold)
+                        Text(
+                            "Receive code",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }

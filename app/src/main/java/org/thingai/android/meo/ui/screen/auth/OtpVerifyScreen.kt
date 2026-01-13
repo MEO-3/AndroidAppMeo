@@ -115,7 +115,11 @@ fun OtpVerifyScreen(
                             strokeWidth = 2.dp
                         )
                     } else {
-                        Text("Verify", fontWeight = FontWeight.Bold)
+                        Text(
+                            "Verify",
+                            style = MaterialTheme.typography.titleMedium,
+                            fontWeight = FontWeight.Bold
+                        )
                     }
                 }
             }
