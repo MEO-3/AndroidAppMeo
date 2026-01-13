@@ -8,6 +8,7 @@ import androidx.navigation.NavHostController
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import org.thingai.android.meo.navigation.Route
+import org.thingai.android.meo.ui.screen.ForgotPasswordScreen
 import org.thingai.android.meo.ui.screen.LoginScreen
 
 const val ANIM_DURATION = 300
@@ -46,6 +47,6 @@ fun AppNavGraph(navController: NavHostController, modifier: Modifier = Modifier)
     ) {
         composable(Route.LOGIN) { LoginScreen(navController) }
         composable(Route.SIGNUP) { }
-
+        composable(Route.FORGOT_PASSWORD) { ForgotPasswordScreen(navController) }
     }
 }

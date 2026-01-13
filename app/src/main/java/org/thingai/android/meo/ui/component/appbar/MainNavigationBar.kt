@@ -46,7 +46,7 @@ data class BottomNavItem(
 @Composable
 fun MainNavigationBar(
     navController: NavController,
-    hideOnRoutes: Set<String> = setOf(Route.LOGIN, Route.SIGNUP),
+    hideOnRoutes: Set<String> = setOf(Route.LOGIN, Route.SIGNUP, Route.FORGOT_PASSWORD),
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val destination = backStackEntry?.destination

@@ -30,6 +30,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import org.thingai.android.meo.navigation.Route
 import org.thingai.android.meo.ui.viewmodel.VMAuth
 
 @Composable
@@ -49,7 +50,7 @@ fun LoginScreen(
             modifier = Modifier
                 .fillMaxSize()
                 .padding(horizontal = 20.dp)
-                .padding(top = 32.dp, bottom = 24.dp),
+                .padding(top = 12.dp, bottom = 24.dp),
         ) {
             Column(
                 horizontalAlignment = Alignment.CenterHorizontally,
@@ -144,7 +145,9 @@ fun LoginScreen(
                         text = "Forgot password?",
                         color = MaterialTheme.colorScheme.error,
                         style = MaterialTheme.typography.bodyMedium,
-                        modifier = Modifier.clickable { }
+                        modifier = Modifier.clickable {
+                            navController.navigate(Route.FORGOT_PASSWORD)
+                        }
                     )
                 }
 
