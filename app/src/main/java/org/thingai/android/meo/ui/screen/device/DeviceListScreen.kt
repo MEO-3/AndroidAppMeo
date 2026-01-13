@@ -1,6 +1,8 @@
 package org.thingai.android.meo.ui.screen.device
 
 import androidx.compose.foundation.layout.*
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Add
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -32,7 +34,15 @@ fun DeviceListScreen(
                     containerColor = MaterialTheme.colorScheme.background,
                     titleContentColor = MaterialTheme.colorScheme.onBackground
                 ),
-                expandedHeight = 0.dp
+                actions = @Composable {
+                    IconButton(onClick = {}) {
+                        Icon(
+                            imageVector = Icons.Default.Add,
+                            contentDescription = "Add device"
+                        )
+                    }
+                },
+                windowInsets = WindowInsets(0, 0, 0, 0),
             )
             Spacer(modifier = Modifier.height(16.dp))
             Column(
