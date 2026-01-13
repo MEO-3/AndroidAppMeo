@@ -181,7 +181,7 @@ fun LoginScreen(
                 Text(
                     text = "Sign up now",
                     color = MaterialTheme.colorScheme.primary,
-                    modifier = Modifier.clickable { }
+                    modifier = Modifier.clickable { navController.navigate(Route.SIGNUP) }
                 )
             }
         }

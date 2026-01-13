@@ -15,6 +15,7 @@ import org.thingai.android.meo.ui.screen.auth.OtpVerifyScreen
 import org.thingai.android.meo.ui.screen.auth.ForgotPasswordScreen
 import org.thingai.android.meo.ui.screen.auth.LoginScreen
 import org.thingai.android.meo.ui.screen.auth.ResetPasswordScreen
+import org.thingai.android.meo.ui.screen.auth.SignUpScreen
 
 const val ANIM_DURATION = 300
 
@@ -51,7 +52,7 @@ fun AppNavGraph(navController: NavHostController, modifier: Modifier = Modifier)
         }
     ) {
         composable(Route.LOGIN) { LoginScreen(navController) }
-        composable(Route.SIGNUP) { }
+        composable(Route.SIGNUP) { SignUpScreen(navController) }
         composable(Route.FORGOT_PASSWORD) { ForgotPasswordScreen(navController) }
         composable(Route.VERIFY_OTP+"?phone={phone}", arguments = listOf(navArgument("phone") {
             type = NavType.StringType;
