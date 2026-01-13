@@ -1,4 +1,4 @@
-package org.thingai.android.meo.ui.auth.otp
+package org.thingai.android.meo.ui.screen.auth
 
 import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
@@ -7,6 +7,7 @@ import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicTextField
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.SolidColor
@@ -50,7 +51,8 @@ fun OtpVerifyScreen(
                 Text(
                     text = "Enter OTP code to verify",
                     style = MaterialTheme.typography.headlineLarge,
-                    color = MaterialTheme.colorScheme.onBackground
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary
                 )
                 Text(
                     text = "Enter the OTP code sent to ${ui.phone}.",
@@ -60,25 +62,30 @@ fun OtpVerifyScreen(
                 )
 
                 Spacer(Modifier.height(24.dp))
-
-                OtpCodeField(
-                    value = ui.otp,
-                    onValueChange = vm::onOtpChanged,
-                    modifier = Modifier.fillMaxWidth().padding(vertical = 8.dp)
-                )
-
-                Spacer(Modifier.height(12.dp))
-
-                Row(
+                Column(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.Start
+                    horizontalAlignment = Alignment.CenterHorizontally
                 ) {
-                    val resendText = if (ui.resendEnabled) "Re-send" else "Re-send (${ui.resendCountdownSeconds}s)"
-                    Text(
-                        text = "Not receive code? $resendText",
-                        color = if (ui.resendEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
-                        modifier = if (ui.resendEnabled) Modifier.clickable { vm.resendCode() } else Modifier
+                    OtpCodeField(
+                        value = ui.otp,
+                        onValueChange = vm::onOtpChanged,
+                        modifier = Modifier.padding(vertical = 8.dp)
                     )
+                    Spacer(Modifier.height(12.dp))
+                    Row(
+                        horizontalArrangement = Arrangement.Start
+                    ) {
+                        val resendText = if (ui.resendEnabled) "Re-send" else "Re-send (${ui.resendCountdownSeconds}s)"
+                        Text(
+                            text = "Not receive code? ",
+                            color = MaterialTheme.colorScheme.onSurfaceVariant,
+                        )
+                        Text(
+                            text = resendText,
+                            color = if (ui.resendEnabled) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.onSurfaceVariant,
+                            modifier = if (ui.resendEnabled) Modifier.clickable { vm.resendCode() } else Modifier
+                        )
+                    }
                 }
 
                 Spacer(Modifier.height(12.dp))
@@ -148,7 +155,7 @@ fun OtpCodeField(
                             text = char,
                             style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
                             modifier = Modifier
-                                .align(androidx.compose.ui.Alignment.Center)
+                                .align(Alignment.Center)
                         )
                     }
                 }
