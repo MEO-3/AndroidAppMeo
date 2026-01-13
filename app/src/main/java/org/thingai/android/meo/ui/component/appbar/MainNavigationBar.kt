@@ -26,6 +26,7 @@ import androidx.navigation.NavController
 import androidx.navigation.compose.currentBackStackEntryAsState
 import androidx.navigation.NavDestination
 import androidx.navigation.NavDestination.Companion.hierarchy
+import com.avis.app.ptalk.navigation.baseRouteOrNull
 import org.thingai.android.meo.navigation.Route
 
 data class BottomNavItem(
@@ -46,7 +47,9 @@ data class BottomNavItem(
 @Composable
 fun MainNavigationBar(
     navController: NavController,
-    hideOnRoutes: Set<String> = setOf(Route.LOGIN, Route.SIGNUP, Route.FORGOT_PASSWORD),
+    hideOnRoutes: Set<String> = setOf(
+        Route.LOGIN, Route.SIGNUP, Route.FORGOT_PASSWORD, Route.VERIFY_OTP
+    ),
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()
     val destination = backStackEntry?.destination
@@ -103,6 +106,6 @@ fun MainNavigationBar(
 }
 
 private fun NavDestination?.isInRoutes(routes: Set<String>): Boolean {
-    if (this == null) return false
-    return hierarchy.any { it.route != null && it.route in routes }
+    if (this?.baseRouteOrNull() == null) return false
+    return hierarchy.any { it.baseRouteOrNull() != null && it.baseRouteOrNull() in routes }
 }

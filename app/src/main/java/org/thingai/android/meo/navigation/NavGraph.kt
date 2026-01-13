@@ -4,10 +4,14 @@ import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
+import androidx.navigation.NavDestination
 import androidx.navigation.NavHostController
+import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
+import androidx.navigation.navArgument
 import org.thingai.android.meo.navigation.Route
+import org.thingai.android.meo.ui.auth.otp.OtpVerifyScreen
 import org.thingai.android.meo.ui.screen.auth.ForgotPasswordScreen
 import org.thingai.android.meo.ui.screen.auth.LoginScreen
 
@@ -48,5 +52,16 @@ fun AppNavGraph(navController: NavHostController, modifier: Modifier = Modifier)
         composable(Route.LOGIN) { LoginScreen(navController) }
         composable(Route.SIGNUP) { }
         composable(Route.FORGOT_PASSWORD) { ForgotPasswordScreen(navController) }
+        composable(Route.VERIFY_OTP+"?phone={phone}", arguments = listOf(navArgument("phone") {
+            type = NavType.StringType;
+            defaultValue = "";
+        })) { OtpVerifyScreen(navController) }
     }
 }
+
+fun String.baseRoute(): String =
+    this.substringBefore("?")     // strip query part e.g. otp?phone={phone} -> otp
+        .substringBefore("/{")    // strip path args e.g. device/{id} -> device
+
+fun NavDestination.baseRouteOrNull(): String? =
+    this.route?.baseRoute()

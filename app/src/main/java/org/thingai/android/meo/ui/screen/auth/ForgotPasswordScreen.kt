@@ -15,6 +15,7 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import org.thingai.android.meo.navigation.Route
 import org.thingai.android.meo.ui.component.appbar.BaseTopAppBar
 import org.thingai.android.meo.ui.viewmodel.VMForgotPassword
 
@@ -27,7 +28,10 @@ fun ForgotPasswordScreen(
 
     // Navigate when code is sent
     if (ui.isCodeSent) {
-        return
+        val route: String = Route.VERIFY_OTP + "?phone=${ui.phone}"
+        navController.navigate(route) {
+            popUpTo(Route.FORGOT_PASSWORD) { inclusive = true }
+        }
     }
 
     Surface(
@@ -35,7 +39,9 @@ fun ForgotPasswordScreen(
         color = MaterialTheme.colorScheme.background
     ) {
         Column(
-            modifier = Modifier.fillMaxSize().padding(top = 12.dp, bottom = 24.dp),
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(top = 12.dp, bottom = 24.dp),
         ) {
             BaseTopAppBar(onBack = {navController.popBackStack()}, colors = TopAppBarDefaults.topAppBarColors(
                 containerColor = MaterialTheme.colorScheme.background,
