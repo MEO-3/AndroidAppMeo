@@ -1,4 +1,4 @@
-package org.thingai.android.meo.ui.viewmodel
+package org.thingai.android.meo.ui.viewmodel.auth
 
 import android.util.Patterns
 import androidx.lifecycle.ViewModel
@@ -29,7 +29,7 @@ class VMAuth: ViewModel() {
         }
 
         private val _uiState = MutableStateFlow(AuthUiState())
-        val uiState: StateFlow<VMAuth.AuthUiState> = _uiState.asStateFlow()
+        val uiState: StateFlow<AuthUiState> = _uiState.asStateFlow()
 
         private val _events = Channel<AuthEvent>(Channel.BUFFERED)
         val events = _events.receiveAsFlow()

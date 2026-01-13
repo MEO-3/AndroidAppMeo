@@ -31,7 +31,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import org.thingai.android.meo.navigation.Route
-import org.thingai.android.meo.ui.viewmodel.VMAuth
+import org.thingai.android.meo.ui.viewmodel.auth.VMAuth
 
 @Composable
 fun LoginScreen(

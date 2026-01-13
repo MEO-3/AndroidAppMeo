@@ -48,7 +48,7 @@ data class BottomNavItem(
 fun MainNavigationBar(
     navController: NavController,
     hideOnRoutes: Set<String> = setOf(
-        Route.LOGIN, Route.SIGNUP, Route.FORGOT_PASSWORD, Route.VERIFY_OTP
+        Route.LOGIN, Route.SIGNUP, Route.FORGOT_PASSWORD, Route.VERIFY_OTP, Route.RESET_PASSWORD
     ),
 ) {
     val backStackEntry by navController.currentBackStackEntryAsState()

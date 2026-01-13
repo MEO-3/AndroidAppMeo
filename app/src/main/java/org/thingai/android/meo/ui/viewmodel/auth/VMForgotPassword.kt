@@ -1,4 +1,4 @@
-package org.thingai.android.meo.ui.viewmodel
+package org.thingai.android.meo.ui.viewmodel.auth
 
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope

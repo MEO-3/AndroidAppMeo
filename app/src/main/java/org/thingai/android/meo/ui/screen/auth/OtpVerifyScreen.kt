@@ -17,8 +17,9 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import org.thingai.android.meo.navigation.Route
 import org.thingai.android.meo.ui.component.appbar.BaseTopAppBar
-import org.thingai.android.meo.ui.viewmodel.VMOtpVerify
+import org.thingai.android.meo.ui.viewmodel.auth.VMOtpVerify
 
 @Composable
 fun OtpVerifyScreen(
@@ -100,7 +101,9 @@ fun OtpVerifyScreen(
                 }
 
                 Button(
-                    onClick = { vm.verifyOtp() },
+                    onClick = { vm.verifyOtp({
+                        navController.navigate(Route.RESET_PASSWORD+"?phone=${ui.phone}")
+                    }) },
                     enabled = ui.canVerify && !ui.isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
