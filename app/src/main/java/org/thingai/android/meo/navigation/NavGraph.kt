@@ -1,4 +1,4 @@
-package com.avis.app.ptalk.navigation
+package org.thingai.android.meo.navigation
 
 import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.core.tween
@@ -10,7 +10,6 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import org.thingai.android.meo.navigation.Route
 import org.thingai.android.meo.ui.screen.auth.OtpVerifyScreen
 import org.thingai.android.meo.ui.screen.auth.ForgotPasswordScreen
 import org.thingai.android.meo.ui.screen.auth.LoginScreen

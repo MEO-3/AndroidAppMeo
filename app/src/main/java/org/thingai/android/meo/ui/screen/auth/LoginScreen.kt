@@ -153,9 +153,7 @@ fun LoginScreen(
 
                 // Login button (tonal for lighter look like screenshot)
                 Button(
-                    onClick = { navController.navigate(Route.DEVICE_LIST) {
-                        popUpTo(navController.graph.startDestinationId) { saveState = false }
-                    } },
+                    onClick = { navController.navigate(Route.DEVICE_LIST) },
                     enabled = true,
                     modifier = Modifier
                         .fillMaxWidth()

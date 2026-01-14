@@ -12,7 +12,7 @@ import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.platform.LocalFocusManager
 import androidx.compose.ui.platform.LocalSoftwareKeyboardController
 import androidx.navigation.compose.rememberNavController
-import com.avis.app.ptalk.navigation.AppNavGraph
+import org.thingai.android.meo.navigation.AppNavGraph
 import org.thingai.android.meo.ui.shared.appbar.MainNavigationBar
 import dagger.hilt.android.AndroidEntryPoint
 import org.thingai.android.meo.ui.theme.AndroidMeoTheme
