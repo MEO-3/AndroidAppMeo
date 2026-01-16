@@ -28,6 +28,8 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
 import org.thingai.android.meo.ui.shared.custom.DialogPosition
+import org.thingai.android.meo.ui.shared.custom.MeoSpacer
+import org.thingai.android.meo.ui.shared.custom.MeoSpacerSize
 
 @Composable
 fun ConfirmDialog(
@@ -36,8 +38,8 @@ fun ConfirmDialog(
     message: String,
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
-    confirmText: String = "Xác nhận",
-    cancelText: String = "Hủy"
+    confirmText: String = "Confirm",
+    cancelText: String = "Cancel"
 ) {
     if (!show) return
 
@@ -102,7 +104,7 @@ fun ConfirmDialog(
                         modifier = Modifier.fillMaxWidth()
                     )
 
-                    Spacer(Modifier.height(8.dp))
+                    MeoSpacer(MeoSpacerSize.SMALL)
 
                     // Actions
                     Row(
