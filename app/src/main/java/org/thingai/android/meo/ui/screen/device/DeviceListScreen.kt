@@ -138,7 +138,8 @@ private fun DeviceTypeSelectDialog(
 
                     // Device type row
                     Card(
-                        modifier = Modifier.fillMaxWidth()
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { }
                     ) {
                         Row(
                             modifier = Modifier
@@ -147,7 +148,7 @@ private fun DeviceTypeSelectDialog(
                             horizontalArrangement = Arrangement.SpaceBetween,
                             verticalAlignment = Alignment.CenterVertically
                         ) {
-                            Text("Meo Gateway")
+                            Text("MEO Gateway")
                             Icon(
                                 imageVector = Icons.Default.DeviceHub,
                                 contentDescription = "Gateway"
