@@ -21,4 +21,4 @@ dependencyResolutionManagement {
 
 rootProject.name = "AndroidMeo"
 include(":app")
- 
+include(":meo-android")
