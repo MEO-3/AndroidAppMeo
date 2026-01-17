@@ -78,6 +78,7 @@ dependencies {
 
     implementation(files("../libs/applicationbase.jar"))
     implementation(files("../libs/meo-common.jar"))
+    implementation(files("../meo-android/build/outputs/aar/meo-android-release.aar"))
 
     // Room runtime
     implementation(libs.androidx.room.ktx)
