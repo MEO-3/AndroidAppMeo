@@ -1,0 +1,222 @@
+package org.thingai.android.app.meo.ui.screen.auth
+
+import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
+import androidx.compose.material3.Icon
+import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.OutlinedTextField
+import androidx.compose.material3.Surface
+import androidx.compose.material3.Text
+import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Modifier
+import androidx.compose.ui.text.font.FontWeight
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
+import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
+import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
+import androidx.navigation.NavController
+import org.thingai.android.app.meo.navigation.Route
+import org.thingai.android.app.meo.ui.viewmodel.auth.VMAuth
+
+@Composable
+fun LoginScreen(
+    navController: NavController,
+    vm: VMAuth = hiltViewModel()
+) {
+    val uiState = vm.uiState.collectAsStateWithLifecycle().value
+    val scope = rememberCoroutineScope()
+
+    // collect events for navigation and error handling
+    LaunchedEffect(Unit) {
+        vm.events.collect { event ->
+            when (event) {
+                is VMAuth.AuthEvent.LoginSuccess -> {
+                    navController.navigate(Route.DEVICE_LIST) {
+                        launchSingleTop = true
+                        popUpTo(navController.graph.startDestinationId) { saveState = false }
+                    }
+                }
+                is VMAuth.AuthEvent.ShowError -> {
+                    // handled by uiState.errorMessage
+                }
+                else -> Unit
+            }
+        }
+    }
+
+    Surface(
+        modifier = Modifier.fillMaxSize(),
+        color = MaterialTheme.colorScheme.background
+    ) {
+        Column(
+            horizontalAlignment = Alignment.CenterHorizontally,
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .fillMaxSize()
+                .padding(horizontal = 20.dp)
+                .padding(top = 12.dp, bottom = 24.dp),
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                verticalArrangement = Arrangement.Center,
+                modifier = Modifier.fillMaxWidth().weight(1f)
+            ) {
+                // Title
+                Text(
+                    text = "Welcome!",
+                    style = MaterialTheme.typography.headlineLarge,
+                    fontWeight = FontWeight.Bold,
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.fillMaxWidth()
+                )
+
+                // Subtitle
+                Text(
+                    text = "Sign in to continue to Make Everything Online.",
+                    style = MaterialTheme.typography.bodyMedium,
+                    color = MaterialTheme.colorScheme.onSurfaceVariant,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(top = 8.dp)
+                )
+
+                Spacer(Modifier.height(24.dp))
+
+                // Email / username
+                OutlinedTextField(
+                    value = uiState.email,
+                    onValueChange = { vm.onEmailChanged(it) },
+                    modifier = Modifier
+                        .fillMaxWidth(),
+                    singleLine = true,
+                    shape = MaterialTheme.shapes.large,
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Email,
+                            contentDescription = "email",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    placeholder = { Text("Enter email") },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Email,
+                        imeAction = ImeAction.Next
+                    )
+                )
+
+                Spacer(Modifier.height(12.dp))
+
+                // Password
+                OutlinedTextField(
+                    value = uiState.password,
+                    onValueChange = { vm.onPasswordChanged(it) },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    shape = MaterialTheme.shapes.large,
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Default.Lock,
+                            contentDescription = "password",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    placeholder = { Text("Enter password") },
+                    visualTransformation = if (uiState.isPasswordVisible) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        IconButton(onClick = { vm.togglePasswordVisibility() }) {
+                            Icon(
+                                imageVector = if (uiState.isPasswordVisible) Icons.Default.VisibilityOff else Icons.Default.Visibility,
+                                contentDescription = "Password Visibility"
+                            )
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(
+                        keyboardType = KeyboardType.Password,
+                        imeAction = ImeAction.Done
+                    )
+                )
+
+                if (uiState.errorMessage != null) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = uiState.errorMessage,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
+                Spacer(Modifier.height(12.dp))
+
+                // Forgot password
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.End
+                ) {
+                    Text(
+                        text = "Forgot password?",
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodyMedium,
+                        modifier = Modifier.clickable {
+                            navController.navigate(Route.FORGOT_PASSWORD)
+                        }
+                    )
+                }
+
+                Spacer(Modifier.height(20.dp))
+
+                // Login button (tonal for lighter look like screenshot)
+                Button(
+                    onClick = { vm.login() },
+                    enabled = !uiState.isLoading,
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(48.dp),
+                    shape = MaterialTheme.shapes.large,
+                    colors = ButtonDefaults.filledTonalButtonColors()
+                ) {
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                    } else {
+                        Text(
+                            text = "Sign in",
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
+                }
+            }
+            // Sign up row
+            Row(
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.Center
+            ) {
+                Text(
+                    text = "Don't have an account? ",
+                    color = MaterialTheme.colorScheme.onSurfaceVariant
+                )
+                Text(
+                    text = "Sign up now",
+                    color = MaterialTheme.colorScheme.primary,
+                    modifier = Modifier.clickable { navController.navigate(Route.SIGNUP) }
+                )
+            }
+        }
+    }
+}
