@@ -4,6 +4,8 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.AccountCircle
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Visibility
@@ -17,8 +19,7 @@ import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
-import androidx.compose.runtime.Composable
-import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.ImeAction
@@ -27,6 +28,7 @@ import androidx.compose.ui.text.input.PasswordVisualTransformation
 import androidx.compose.ui.text.input.VisualTransformation
 import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
+import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import org.thingai.android.meo.navigation.Route
 import org.thingai.android.meo.ui.viewmodel.auth.VMAuth
@@ -36,17 +38,22 @@ fun SignUpScreen(
     navController: NavHostController,
     vm: VMAuth = hiltViewModel()
 ) {
-    val ui = vm.uiState.collectAsState().value
+    val ui = vm.uiState.collectAsStateWithLifecycle().value
 
-    // Navigate to Login after successful sign-up (align with your auth flow)
-//    if (ui.isSignedUp) {
-//        navController.navigate(Route.LOGIN) {
-//            launchSingleTop = true
-//            // Keep a clean stack by popping up to the graph start when moving to login
-//            popUpTo(navController.graph.startDestinationId) { saveState = false }
-//        }
-//        return
-//    }
+    LaunchedEffect(Unit) {
+        vm.events.collect { event ->
+            when (event) {
+                is VMAuth.AuthEvent.SignupSuccess -> {
+                    // after successful signup, navigate to login (or device list per your flow)
+                    navController.navigate(Route.DEVICE_LIST) {
+                        launchSingleTop = true
+                        popUpTo(navController.graph.startDestinationId) { saveState = false }
+                    }
+                }
+                else -> Unit
+            }
+        }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -73,6 +80,52 @@ fun SignUpScreen(
             )
 
             Spacer(Modifier.height(24.dp))
+
+            // Username
+            OutlinedTextField(
+                value = ui.username,
+                onValueChange = vm::onUsernameChanged,
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                shape = MaterialTheme.shapes.large,
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.AccountCircle,
+                        contentDescription = "Username",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                placeholder = { Text("Username") },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Text,
+                    imeAction = ImeAction.Next
+                )
+            )
+
+            Spacer(Modifier.height(12.dp))
+
+            // Email
+            OutlinedTextField(
+                value = ui.email,
+                onValueChange = vm::onEmailChanged,
+                modifier = Modifier.fillMaxWidth(),
+                singleLine = true,
+                shape = MaterialTheme.shapes.large,
+                leadingIcon = {
+                    Icon(
+                        imageVector = Icons.Default.Email,
+                        contentDescription = "Email",
+                        tint = MaterialTheme.colorScheme.onSurfaceVariant
+                    )
+                },
+                placeholder = { Text("Email address") },
+                keyboardOptions = KeyboardOptions(
+                    keyboardType = KeyboardType.Email,
+                    imeAction = ImeAction.Next
+                )
+            )
+
+            Spacer(Modifier.height(12.dp))
 
             // Phone
             OutlinedTextField(

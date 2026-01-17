@@ -73,6 +73,9 @@ dependencies {
 
     implementation(libs.androidx.compose.material.icons.extended)
 
+    implementation(libs.okhttp)
+    implementation(libs.androidx.datastore.preferences.rxjava3)
+
     implementation(files("../libs/applicationbase.jar"))
     implementation(files("../libs/meo-common.jar"))
 
@@ -88,4 +91,7 @@ dependencies {
     ksp(libs.hilt.android.compiler)
 
     implementation(libs.androidx.hilt.navigation.compose)
+
+    implementation("com.squareup.retrofit2:retrofit:2.9.0")
+    implementation("com.squareup.retrofit2:converter-gson:2.9.0")
 }

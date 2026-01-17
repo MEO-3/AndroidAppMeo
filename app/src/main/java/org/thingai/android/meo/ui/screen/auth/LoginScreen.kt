@@ -5,12 +5,14 @@ import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Email
 import androidx.compose.material.icons.filled.Lock
 import androidx.compose.material.icons.filled.Phone
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.VisibilityOff
 import androidx.compose.material3.Button
 import androidx.compose.material3.ButtonDefaults
+import androidx.compose.material3.CircularProgressIndicator
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
@@ -30,6 +32,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import kotlinx.coroutines.flow.collect
+import kotlinx.coroutines.launch
 import org.thingai.android.meo.navigation.Route
 import org.thingai.android.meo.ui.viewmodel.auth.VMAuth
 
@@ -39,6 +43,25 @@ fun LoginScreen(
     vm: VMAuth = hiltViewModel()
 ) {
     val uiState = vm.uiState.collectAsStateWithLifecycle().value
+    val scope = rememberCoroutineScope()
+
+    // collect events for navigation and error handling
+    LaunchedEffect(Unit) {
+        vm.events.collect { event ->
+            when (event) {
+                is VMAuth.AuthEvent.LoginSuccess -> {
+                    navController.navigate(Route.DEVICE_LIST) {
+                        launchSingleTop = true
+                        popUpTo(navController.graph.startDestinationId) { saveState = false }
+                    }
+                }
+                is VMAuth.AuthEvent.ShowError -> {
+                    // handled by uiState.errorMessage
+                }
+                else -> Unit
+            }
+        }
+    }
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -78,24 +101,24 @@ fun LoginScreen(
 
                 Spacer(Modifier.height(24.dp))
 
-                // Phone
+                // Email / username
                 OutlinedTextField(
-                    value = uiState.phoneNumber,
-                    onValueChange = { vm.onPhoneNumberChanged(it) },
+                    value = uiState.email,
+                    onValueChange = { vm.onEmailChanged(it) },
                     modifier = Modifier
                         .fillMaxWidth(),
                     singleLine = true,
                     shape = MaterialTheme.shapes.large,
                     leadingIcon = {
                         Icon(
-                            imageVector = Icons.Default.Phone,
-                            contentDescription = "phone",
+                            imageVector = Icons.Default.Email,
+                            contentDescription = "email",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
-                    placeholder = { Text("Enter phone number") },
+                    placeholder = { Text("Enter email") },
                     keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Phone,
+                        keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Next
                     )
                 )
@@ -132,6 +155,15 @@ fun LoginScreen(
                     )
                 )
 
+                if (uiState.errorMessage != null) {
+                    Spacer(Modifier.height(8.dp))
+                    Text(
+                        text = uiState.errorMessage,
+                        color = MaterialTheme.colorScheme.error,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+
                 Spacer(Modifier.height(12.dp))
 
                 // Forgot password
@@ -153,20 +185,24 @@ fun LoginScreen(
 
                 // Login button (tonal for lighter look like screenshot)
                 Button(
-                    onClick = { navController.navigate(Route.DEVICE_LIST) },
-                    enabled = true,
+                    onClick = { vm.login() },
+                    enabled = !uiState.isLoading,
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(48.dp),
                     shape = MaterialTheme.shapes.large,
                     colors = ButtonDefaults.filledTonalButtonColors()
                 ) {
-                    Text(
-                        text = "Sign in",
-                        style = MaterialTheme.typography.titleMedium,
-                        textAlign = TextAlign.Center,
-                        fontWeight = FontWeight.Bold
-                    )
+                    if (uiState.isLoading) {
+                        CircularProgressIndicator(modifier = Modifier.size(20.dp), strokeWidth = 2.dp)
+                    } else {
+                        Text(
+                            text = "Sign in",
+                            style = MaterialTheme.typography.titleMedium,
+                            textAlign = TextAlign.Center,
+                            fontWeight = FontWeight.Bold
+                        )
+                    }
                 }
             }
             // Sign up row
