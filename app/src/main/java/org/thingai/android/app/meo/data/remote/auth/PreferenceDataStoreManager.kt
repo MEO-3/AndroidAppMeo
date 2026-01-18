@@ -7,7 +7,7 @@ import androidx.datastore.preferences.core.stringPreferencesKey
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.firstOrNull
 import kotlinx.coroutines.flow.map
-import org.thingai.android.meo.model.dto.TokenModel
+import org.thingai.android.app.meo.model.dto.TokenModel
 
 class PreferenceDataStoreManager(private val dataStore: DataStore<Preferences>) {
     private val KEY_ACCESS = stringPreferencesKey("pref_access_token")

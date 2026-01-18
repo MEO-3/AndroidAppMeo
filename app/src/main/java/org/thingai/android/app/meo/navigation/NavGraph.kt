@@ -10,12 +10,12 @@ import androidx.navigation.NavType
 import androidx.navigation.compose.NavHost
 import androidx.navigation.compose.composable
 import androidx.navigation.navArgument
-import org.thingai.android.meo.ui.screen.auth.OtpVerifyScreen
-import org.thingai.android.meo.ui.screen.auth.ForgotPasswordScreen
-import org.thingai.android.meo.ui.screen.auth.LoginScreen
-import org.thingai.android.meo.ui.screen.auth.ResetPasswordScreen
-import org.thingai.android.meo.ui.screen.auth.SignUpScreen
-import org.thingai.android.meo.ui.screen.device.DeviceListScreen
+import org.thingai.android.app.meo.ui.screen.auth.OtpVerifyScreen
+import org.thingai.android.app.meo.ui.screen.auth.ForgotPasswordScreen
+import org.thingai.android.app.meo.ui.screen.auth.LoginScreen
+import org.thingai.android.app.meo.ui.screen.auth.ResetPasswordScreen
+import org.thingai.android.app.meo.ui.screen.auth.SignUpScreen
+import org.thingai.android.app.meo.ui.screen.device.DeviceListScreen
 
 const val ANIM_DURATION = 300
 

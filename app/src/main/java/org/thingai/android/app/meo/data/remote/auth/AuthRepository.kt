@@ -2,8 +2,8 @@ package org.thingai.android.app.meo.data.remote.auth
 
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
-import org.thingai.android.meo.model.dto.LoginRequest
-import org.thingai.android.meo.model.dto.SignupRequest
+import org.thingai.android.app.meo.model.dto.LoginRequest
+import org.thingai.android.app.meo.model.dto.SignupRequest
 import org.json.JSONObject
 import retrofit2.HttpException
 

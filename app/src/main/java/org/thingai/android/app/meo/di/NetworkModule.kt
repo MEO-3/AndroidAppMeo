@@ -15,11 +15,11 @@ import okhttp3.OkHttpClient
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 import javax.inject.Singleton
-import org.thingai.android.meo.data.remote.auth.AuthApiService
-import org.thingai.android.meo.data.remote.auth.AuthInterceptor
-import org.thingai.android.meo.data.remote.auth.AuthRepository
-import org.thingai.android.meo.data.remote.auth.PreferenceDataStoreManager
-import org.thingai.android.meo.data.remote.auth.TokenAuthenticator
+import org.thingai.android.app.meo.data.remote.auth.AuthApiService
+import org.thingai.android.app.meo.data.remote.auth.AuthInterceptor
+import org.thingai.android.app.meo.data.remote.auth.AuthRepository
+import org.thingai.android.app.meo.data.remote.auth.PreferenceDataStoreManager
+import org.thingai.android.app.meo.data.remote.auth.TokenAuthenticator
 
 @Module
 @InstallIn(SingletonComponent::class)

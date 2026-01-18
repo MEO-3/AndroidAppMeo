@@ -1,8 +1,8 @@
 package org.thingai.android.app.meo.data.remote.auth
 
-import org.thingai.android.meo.model.dto.AuthResponse
-import org.thingai.android.meo.model.dto.LoginRequest
-import org.thingai.android.meo.model.dto.SignupRequest
+import org.thingai.android.app.meo.model.dto.AuthResponse
+import org.thingai.android.app.meo.model.dto.LoginRequest
+import org.thingai.android.app.meo.model.dto.SignupRequest
 import retrofit2.Call
 import retrofit2.http.Body
 import retrofit2.http.POST
