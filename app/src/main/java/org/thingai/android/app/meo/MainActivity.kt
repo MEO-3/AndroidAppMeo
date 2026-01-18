@@ -16,15 +16,17 @@ import org.thingai.android.app.meo.navigation.AppNavGraph
 import org.thingai.android.app.meo.ui.shared.appbar.MainNavigationBar
 import dagger.hilt.android.AndroidEntryPoint
 import org.thingai.android.app.meo.ui.theme.AndroidMeoTheme
+import org.thingai.android.module.meo.MeoSdk
 import org.thingai.base.log.ILog
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
         ILog.logLevel = ILog.DEBUG
         ILog.ENABLE_LOGGING = true
+
+        MeoSdk.init(this.applicationContext)
 
         ILog.d("MainActivity", "onCreate")
 

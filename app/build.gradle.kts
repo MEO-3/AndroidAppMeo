@@ -10,14 +10,14 @@ plugins {
 }
 
 android {
-    namespace = "org.thingai.android.meo"
+    namespace = "org.thingai.android.app.meo"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
         applicationId = "org.thingai.android.meo"
-        minSdk = 31
+        minSdk = 33
         targetSdk = 36
         versionCode = 1
         versionName = "1.0"
@@ -36,12 +36,12 @@ android {
     }
 
     kotlin {
-        compilerOptions.jvmTarget.set(JvmTarget.JVM_11)
+        compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
     }
 
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     buildFeatures {
         compose = true
@@ -73,12 +73,7 @@ dependencies {
 
     implementation(libs.androidx.compose.material.icons.extended)
 
-    implementation(libs.okhttp)
-    implementation(libs.androidx.datastore.preferences.rxjava3)
 
-    implementation(files("../libs/applicationbase.jar"))
-    implementation(files("../libs/meo-common.jar"))
-    implementation(files("../meo-android/build/outputs/aar/meo-android-release.aar"))
 
     // Room runtime
     implementation(libs.androidx.room.ktx)
@@ -90,9 +85,15 @@ dependencies {
     // Hilt via KSP (2.50+ supports KSP)
     implementation(libs.hilt.android)
     ksp(libs.hilt.android.compiler)
-
     implementation(libs.androidx.hilt.navigation.compose)
 
+    implementation(files("../libs/meo-android-release.aar"))
+    implementation(files("../libs/applicationbase.jar"))
+    implementation(files("../libs/meo-common.jar"))
+
+    implementation(libs.okhttp)
+    implementation(libs.androidx.datastore.preferences.rxjava3)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
+    implementation(libs.org.eclipse.paho.mqttv5.client)
 }

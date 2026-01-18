@@ -28,11 +28,11 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
     kotlin {
-        compilerOptions.jvmTarget.set(JvmTarget.JVM_11)
+        compilerOptions.jvmTarget.set(JvmTarget.JVM_17)
     }
 }
 
@@ -47,11 +47,12 @@ dependencies {
     implementation(libs.okhttp)
     implementation(libs.androidx.datastore.preferences.rxjava3)
 
-    implementation(files("../libs/applicationbase.jar"))
-    implementation(files("../libs/meo-common.jar"))
+    compileOnly(files("../libs/applicationbase.jar"))
+    compileOnly(files("../libs/meo-common.jar"))
 
     implementation(libs.org.eclipse.paho.mqttv5.client)
     implementation(libs.retrofit)
     implementation(libs.converter.gson)
     implementation(libs.gson)
+    implementation(libs.okhttp)
 }

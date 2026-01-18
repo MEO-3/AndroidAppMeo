@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.receiveAsFlow
 import kotlinx.coroutines.launch
 import javax.inject.Inject
 import org.thingai.android.app.meo.data.remote.auth.AuthRepository
+import org.thingai.android.module.meo.MeoSdk
 
 @HiltViewModel
 class VMAuth @Inject constructor(
@@ -76,7 +77,8 @@ class VMAuth @Inject constructor(
 
         viewModelScope.launch {
             _uiState.value = _uiState.value.copy(isLoading = true, errorMessage = null)
-            val res = repo.login(authUsername, current.password)
+
+            val res = MeoSdk.authHandler().login(authUsername, current.password)
             if (res.isSuccess) {
                 _events.send(AuthEvent.LoginSuccess)
             } else {

@@ -27,9 +27,9 @@ import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.DialogProperties
-import org.thingai.android.meo.ui.shared.custom.DialogPosition
-import org.thingai.android.meo.ui.shared.custom.MeoSpacer
-import org.thingai.android.meo.ui.shared.custom.MeoSpacerSize
+import org.thingai.android.app.meo.ui.shared.custom.DialogPosition
+import org.thingai.android.app.meo.ui.shared.custom.MeoSpacer
+import org.thingai.android.app.meo.ui.shared.custom.MeoSpacerSize
 
 @Composable
 fun ConfirmDialog(
