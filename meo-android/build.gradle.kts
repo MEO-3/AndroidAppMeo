@@ -44,6 +44,14 @@ dependencies {
     androidTestImplementation(libs.androidx.junit)
     androidTestImplementation(libs.androidx.espresso.core)
 
+    implementation(libs.okhttp)
+    implementation(libs.androidx.datastore.preferences.rxjava3)
+
     implementation(files("../libs/applicationbase.jar"))
     implementation(files("../libs/meo-common.jar"))
+
+    implementation(libs.org.eclipse.paho.mqttv5.client)
+    implementation(libs.retrofit)
+    implementation(libs.converter.gson)
+    implementation(libs.gson)
 }
