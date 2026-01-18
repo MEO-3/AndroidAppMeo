@@ -7,6 +7,7 @@ import org.thingai.base.log.ILog
 import org.thingai.meo.common.handler.MDeviceDiscoveryBleHandler
 import org.thingai.meo.common.handler.MDeviceDiscoveryLanHandler
 import retrofit2.Retrofit
+import retrofit2.converter.gson.GsonConverterFactory
 
 class MeoSdk private constructor(
     private val appContext: Context
@@ -25,6 +26,7 @@ class MeoSdk private constructor(
 
         retrofit = Retrofit.Builder()
             .baseUrl(BASE_CLOUD_URL)
+            .addConverterFactory(GsonConverterFactory.create())
             .build()
 
         // Init handlers

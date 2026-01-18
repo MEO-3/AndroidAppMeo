@@ -38,6 +38,8 @@ class AuthHandler(private val api: AuthApi) {
                 Result.failure(Exception(errorDetail))
             }
         } catch (t: Throwable) {
+            t.printStackTrace()
+            ILog.e(TAG, "failed", t.message)
             Result.failure(t)
         }
     }

@@ -87,7 +87,7 @@ dependencies {
     ksp(libs.hilt.android.compiler)
     implementation(libs.androidx.hilt.navigation.compose)
 
-    implementation(files("../libs/meo-android-release.aar"))
+    implementation(project(":meo-android"))
     implementation(files("../libs/applicationbase.jar"))
     implementation(files("../libs/meo-common.jar"))
 
