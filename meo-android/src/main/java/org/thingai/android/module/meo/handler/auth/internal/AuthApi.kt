@@ -1,6 +1,5 @@
 package org.thingai.android.module.meo.handler.auth.internal
 
-import okhttp3.RequestBody
 import org.thingai.meo.common.dto.ResponseOk
 import org.thingai.meo.common.dto.auth.RequestLogin
 import org.thingai.meo.common.dto.auth.RequestRefresh

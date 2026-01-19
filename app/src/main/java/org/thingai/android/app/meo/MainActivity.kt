@@ -15,9 +15,11 @@ import androidx.navigation.compose.rememberNavController
 import org.thingai.android.app.meo.navigation.AppNavGraph
 import org.thingai.android.app.meo.ui.shared.appbar.MainNavigationBar
 import dagger.hilt.android.AndroidEntryPoint
+import org.thingai.android.app.meo.navigation.Route
 import org.thingai.android.app.meo.ui.theme.AndroidMeoTheme
 import org.thingai.android.module.meo.MeoSdk
 import org.thingai.base.log.ILog
+import org.thingai.meo.common.callback.RequestCallback
 
 @AndroidEntryPoint
 class MainActivity : ComponentActivity() {
@@ -28,13 +30,28 @@ class MainActivity : ComponentActivity() {
 
         MeoSdk.init(this.applicationContext)
 
-        ILog.d("MainActivity", "onCreate")
-
         enableEdgeToEdge()
         setContent {
             val navController = rememberNavController()
             val focusManager = LocalFocusManager.current
             val keyboardController = LocalSoftwareKeyboardController.current
+
+            MeoSdk.connect(object : RequestCallback<Boolean> {
+                override fun onSuccess(p0: Boolean?, p1: String?) {
+                    if (p0 == false) {
+                        ILog.d("MainActivity", "Not authenticated")
+                        navController.navigate(Route.LOGIN)
+                    } else {
+                        ILog.d("MainActivity", "Authenticated")
+                        navController.navigate(Route.DEVICE_LIST)
+                    }
+                }
+
+                override fun onFailure(p0: Int, p1: String?) {
+                    ILog.d("MainActivity", "connect failed")
+                }
+
+            })
 
             AndroidMeoTheme(
                 content = {

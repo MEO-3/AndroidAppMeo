@@ -1,6 +1,10 @@
 package org.thingai.android.module.meo
 
 import android.content.Context
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import org.thingai.android.module.meo.handler.auth.AuthHandler
 import org.thingai.android.module.meo.handler.auth.internal.AuthApi
@@ -8,6 +12,7 @@ import org.thingai.android.module.meo.handler.auth.internal.AuthInterceptor
 import org.thingai.android.module.meo.handler.auth.internal.AuthPrefs
 import org.thingai.android.module.meo.handler.auth.internal.TokenAuthenticator
 import org.thingai.base.log.ILog
+import org.thingai.meo.common.callback.RequestCallback
 import org.thingai.meo.common.handler.MDeviceDiscoveryBleHandler
 import org.thingai.meo.common.handler.MDeviceDiscoveryLanHandler
 import retrofit2.Retrofit
@@ -49,6 +54,48 @@ class MeoSdk private constructor(
         instance = this
     }
 
+    /**
+     * Try to connect / validate current authentication state.
+     * The callback receives a boolean indicating whether the SDK is authenticated.
+     * onSuccess(true, message) -> authenticated
+     * onSuccess(false, message) -> not authenticated or backend rejected token
+     * onFailure(code, message) -> unrecoverable error (e.g., exception)
+     */
+    fun connect(callback: RequestCallback<Boolean>) {
+        CoroutineScope(Dispatchers.IO).launch {
+            ILog.d(TAG, "connect")
+            try {
+                // 1) Check if there is an access token stored
+                val accessToken = authHandler.getAccessToken()
+                if (accessToken.isNullOrBlank()) {
+                    withContext(Dispatchers.Main) {
+                        callback.onSuccess(false, "No access token")
+                    }
+                    return@launch
+                }
+
+                // 2) Try to refresh tokens to validate authentication; refresh will use stored refresh token
+                val refreshResult = authHandler.refresh()
+
+                if (refreshResult.isSuccess) {
+                    withContext(Dispatchers.Main) {
+                        callback.onSuccess(true, "Authenticated")
+                    }
+                } else {
+                    val msg = refreshResult.exceptionOrNull()?.message ?: "Not authenticated"
+                    withContext(Dispatchers.Main) {
+                        callback.onSuccess(false, msg)
+                    }
+                }
+            } catch (t: Throwable) {
+                ILog.e(TAG, "connect failed", t.message)
+                withContext(Dispatchers.Main) {
+                    callback.onFailure(-1, t.message ?: "Unknown error")
+                }
+            }
+        }
+    }
+
     companion object {
         private lateinit var instance: MeoSdk
 
@@ -59,6 +106,15 @@ class MeoSdk private constructor(
 
         fun authHandler(): AuthHandler {
             return instance.authHandler
+        }
+
+        // Convenience static connect method
+        fun connect(callback: RequestCallback<Boolean>) {
+            if (!::instance.isInitialized) {
+                callback.onFailure(1, "MeoSdk not initialized")
+                return
+            }
+            instance.connect(callback)
         }
     }
 }
