@@ -32,6 +32,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import org.thingai.android.app.meo.navigation.Route
+import org.thingai.android.app.meo.ui.shared.dialog.ErrorDialog
 import org.thingai.android.app.meo.ui.viewmodel.auth.VMAuth
 
 @Composable
@@ -40,7 +41,9 @@ fun LoginScreen(
     vm: VMAuth = hiltViewModel()
 ) {
     val uiState = vm.uiState.collectAsStateWithLifecycle().value
-    val scope = rememberCoroutineScope()
+
+    // dialog state (use dialogMessage as single source of truth)
+    var dialogMessage by remember { mutableStateOf<String?>(null) }
 
     // collect events for navigation and error handling
     LaunchedEffect(Unit) {
@@ -53,12 +56,20 @@ fun LoginScreen(
                     }
                 }
                 is VMAuth.AuthEvent.ShowError -> {
-                    // handled by uiState.errorMessage
+                    dialogMessage = event.message
                 }
                 else -> Unit
             }
         }
     }
+
+    ErrorDialog(
+        show = dialogMessage != null,
+        message = dialogMessage,
+        onDismiss = {
+            dialogMessage = null
+        }
+    )
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -152,14 +163,6 @@ fun LoginScreen(
                     )
                 )
 
-                if (uiState.errorMessage != null) {
-                    Spacer(Modifier.height(8.dp))
-                    Text(
-                        text = uiState.errorMessage,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                }
 
                 Spacer(Modifier.height(12.dp))
 

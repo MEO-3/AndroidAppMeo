@@ -31,6 +31,7 @@ import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavHostController
 import org.thingai.android.app.meo.navigation.Route
+import org.thingai.android.app.meo.ui.shared.dialog.ErrorDialog
 import org.thingai.android.app.meo.ui.viewmodel.auth.VMAuth
 
 @Composable
@@ -40,20 +41,33 @@ fun SignUpScreen(
 ) {
     val ui = vm.uiState.collectAsStateWithLifecycle().value
 
+    var dialogMessage by remember { mutableStateOf<String?>(null) }
+
     LaunchedEffect(Unit) {
         vm.events.collect { event ->
             when (event) {
                 is VMAuth.AuthEvent.SignupSuccess -> {
-                    // after successful signup, navigate to login (or device list per your flow)
+                    // after successful signup, navigate to device list
                     navController.navigate(Route.DEVICE_LIST) {
                         launchSingleTop = true
                         popUpTo(navController.graph.startDestinationId) { saveState = false }
                     }
                 }
+                is VMAuth.AuthEvent.ShowError -> {
+                    dialogMessage = event.message
+                }
                 else -> Unit
             }
         }
     }
+
+    ErrorDialog(
+        show = dialogMessage != null,
+        message = dialogMessage,
+        onDismiss = {
+            dialogMessage = null
+        }
+    )
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -212,14 +226,7 @@ fun SignUpScreen(
                 )
             )
 
-            if (ui.errorMessage != null) {
-                Spacer(Modifier.height(8.dp))
-                Text(
-                    text = ui.errorMessage,
-                    color = MaterialTheme.colorScheme.error,
-                    style = MaterialTheme.typography.bodySmall
-                )
-            }
+            Spacer(Modifier.height(12.dp))
 
             Spacer(Modifier.height(20.dp))
 

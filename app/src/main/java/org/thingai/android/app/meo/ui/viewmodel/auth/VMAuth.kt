@@ -68,7 +68,10 @@ class VMAuth @Inject constructor() : ViewModel() {
         val authUsername = current.email
 
         if (authUsername.isBlank() || current.password.isBlank()) {
-            _uiState.value = _uiState.value.copy(errorMessage = "Username and password are required")
+            // emit a transient error event instead of keeping it in uiState
+            viewModelScope.launch {
+                _events.send(AuthEvent.ShowError("Username and password are required"))
+            }
             return
         }
 
@@ -80,7 +83,7 @@ class VMAuth @Inject constructor() : ViewModel() {
                 _events.send(AuthEvent.LoginSuccess)
             } else {
                 val msg = res.exceptionOrNull()?.message ?: "Login failed"
-                _uiState.value = _uiState.value.copy(errorMessage = msg)
+                _events.send(AuthEvent.ShowError(msg))
             }
             _uiState.value = _uiState.value.copy(isLoading = false)
         }
@@ -89,11 +92,15 @@ class VMAuth @Inject constructor() : ViewModel() {
     fun signup() {
         val current = _uiState.value
         if (current.username.isBlank() || current.email.isBlank() || current.phoneNumber.isBlank() || current.password.isBlank()) {
-            _uiState.value = _uiState.value.copy(errorMessage = "All fields are required")
+            viewModelScope.launch {
+                _events.send(AuthEvent.ShowError("All fields are required"))
+            }
             return
         }
         if (current.password != current.confirmPassword) {
-            _uiState.value = _uiState.value.copy(errorMessage = "Passwords do not match")
+            viewModelScope.launch {
+                _events.send(AuthEvent.ShowError("Passwords do not match"))
+            }
             return
         }
 
@@ -111,7 +118,7 @@ class VMAuth @Inject constructor() : ViewModel() {
             } else {
                 // switch error message to match backend response
                 val msg = res.exceptionOrNull()?.message ?: "Signup failed"
-                _uiState.value = _uiState.value.copy(errorMessage = msg)
+                _events.send(AuthEvent.ShowError(msg))
             }
             _uiState.value = _uiState.value.copy(isLoading = false)
         }

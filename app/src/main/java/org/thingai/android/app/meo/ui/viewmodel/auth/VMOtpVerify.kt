@@ -56,15 +56,14 @@ class VMOtpVerify @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                // local quick check; server-side OTP verification happens during reset
                 val res = MeoSdk.authHandler().verifyOtp(state.email, state.otp, MOtpPurpose.PASSWORD_RESET)
                 if (!res.isSuccess) {
                     val ex = res.exceptionOrNull()
-                    _uiState.update { it.copy(errorMessage = ex?.message ?: "OTP verification failed") }
-                    return@launch
+                    _uiState.update { it.copy(isLoading = false, errorMessage = ex?.message ?: "OTP verification failed") }
+                } else {
+                    _uiState.update { it.copy(isLoading = false) }
+                    onVerified(state.email, state.otp)
                 }
-                _uiState.update { it.copy(isLoading = false) }
-                onVerified(state.email, state.otp)
             } catch (t: Throwable) {
                 _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: "OTP verification failed") }
             }
