@@ -9,6 +9,10 @@ import org.thingai.meo.common.dto.auth.RequestLogin
 import org.thingai.meo.common.dto.auth.RequestRefresh
 import org.thingai.meo.common.dto.auth.RequestSignup
 import org.thingai.meo.common.dto.auth.ResponseAuth
+import org.thingai.meo.common.dto.otp.RequestOtpCreate
+import org.thingai.meo.common.dto.otp.RequestResetPasswordConfirm
+import org.thingai.meo.common.dto.ResponseOk
+import retrofit2.Response
 
 class AuthHandler internal constructor(
     private val api: AuthApi,
@@ -67,13 +71,61 @@ class AuthHandler internal constructor(
         }
     }
 
+    // Request a password-reset OTP. Purpose is forced to 1 by the caller
+    suspend fun requestPasswordReset(email: String, ttlMinutes: Int? = null): Result<ResponseOk> {
+        return try {
+            val requestBody = RequestOtpCreate()
+            requestBody.email = email
+            requestBody.purpose = 1
+            if (ttlMinutes != null) requestBody.ttlMinutes = ttlMinutes.toString()
+
+            val response = api.requestPasswordReset(requestBody)
+            handleOtpCreateResponse(response)
+        } catch (t: Throwable) {
+            t.printStackTrace()
+            ILog.e(TAG, "failed", t.message)
+            Result.failure(t)
+        }
+    }
+
+    // Verify password-reset OTP and update password
+    suspend fun resetPassword(email: String, otp: String, newPassword: String): Result<Unit> {
+        return try {
+            val requestBody = RequestResetPasswordConfirm()
+            requestBody.email = email
+            requestBody.otp = otp
+            requestBody.newPassword = newPassword
+
+            val response = api.resetPassword(requestBody)
+            if (response.isSuccessful) {
+                Result.success(Unit)
+            } else {
+                val statusCode = response.code()
+                val errorBodyString = response.errorBody()?.string()
+                val errorDetail = try {
+                    val errorObj = gson.fromJson(errorBodyString, ResponseError::class.java)
+                    errorObj?.detail ?: "Unknown error"
+                } catch (e: Exception) {
+                    "Error code $statusCode: ${response.message()}"
+                }
+
+                ILog.e(TAG, "API call failed ($statusCode): $errorDetail")
+                Result.failure(Exception(errorDetail))
+            }
+        } catch (t: Throwable) {
+            t.printStackTrace()
+            ILog.e(TAG, "failed", t.message)
+            Result.failure(t)
+        }
+    }
+
     suspend fun getAccessToken(): String? = prefs.getAccessToken()
 
     suspend fun logout() {
         prefs.clear()
     }
 
-    private suspend fun handleResponse(response: retrofit2.Response<ResponseAuth>): Result<ResponseAuth> {
+    private suspend fun handleResponse(response: Response<ResponseAuth>): Result<ResponseAuth> {
         val statusCode = response.code()
         return if (response.isSuccessful) {
             val authResponse = response.body()!!
@@ -97,5 +149,24 @@ class AuthHandler internal constructor(
         t.printStackTrace()
         ILog.e(TAG, "failed", t.message)
         return Result.failure(t)
+    }
+
+    private fun handleOtpCreateResponse(response: Response<ResponseOk>): Result<ResponseOk> {
+        val statusCode = response.code()
+        return if (response.isSuccessful) {
+            val body = response.body()!!
+            Result.success(body)
+        } else {
+            val errorBodyString = response.errorBody()?.string()
+            val errorDetail = try {
+                val errorObj = gson.fromJson(errorBodyString, ResponseError::class.java)
+                errorObj?.detail ?: "Unknown error"
+            } catch (e: Exception) {
+                "Error code $statusCode: ${response.message()}"
+            }
+
+            ILog.e(TAG, "API call failed ($statusCode): $errorDetail")
+            Result.failure(Exception(errorDetail))
+        }
     }
 }

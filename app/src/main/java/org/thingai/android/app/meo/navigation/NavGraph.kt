@@ -58,10 +58,16 @@ fun AppNavGraph(navController: NavHostController, modifier: Modifier = Modifier)
             type = NavType.StringType;
             defaultValue = "";
         })) { OtpVerifyScreen(navController) }
-        composable(Route.RESET_PASSWORD+"?phone={phone}", arguments = listOf(navArgument("phone") {
-            type = NavType.StringType;
-            defaultValue = "";
-        })) { ResetPasswordScreen(navController) }
+        composable(Route.RESET_PASSWORD+"?phone={phone}&otp={otp}", arguments = listOf(
+            navArgument("phone") {
+                type = NavType.StringType
+                defaultValue = ""
+            },
+            navArgument("otp") {
+                type = NavType.StringType
+                defaultValue = ""
+            }
+        )) { ResetPasswordScreen(navController) }
         composable(Route.DEVICE_LIST) { DeviceListScreen(navController) }
     }
 }

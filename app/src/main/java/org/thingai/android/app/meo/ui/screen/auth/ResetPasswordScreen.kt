@@ -33,6 +33,8 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.navigation.NavHostController
 import org.thingai.android.app.meo.ui.shared.appbar.BaseTopAppBar
+import org.thingai.android.app.meo.ui.shared.dialog.ErrorDialog
+import org.thingai.android.app.meo.ui.shared.dialog.SuccessDialog
 import org.thingai.android.app.meo.ui.viewmodel.auth.VMResetPassword
 
 @Composable
@@ -42,11 +44,21 @@ fun ResetPasswordScreen(
 ) {
     val ui = viewModel.uiState.collectAsState().value
 
-    // Navigate up when saved, consistent with other auth screens
-    if (ui.isSaved) {
-        navController.navigateUp()
-        return
-    }
+    // Show error dialog when there's an error
+    ErrorDialog(
+        show = ui.errorMessage != null,
+        message = ui.errorMessage,
+        onDismiss = { viewModel.clearError() }
+    )
+
+    // Show success dialog when saved; when confirmed navigate up
+    SuccessDialog(
+        show = ui.isSaved,
+        title = "Password updated",
+        message = "Your password has been updated successfully.",
+        onDismiss = { /* no-op */ },
+        onConfirm = { navController.navigateUp() }
+    )
 
     var pwVisible by rememberSaveable { mutableStateOf(false) }
     var pwConfirmVisible by rememberSaveable { mutableStateOf(false) }

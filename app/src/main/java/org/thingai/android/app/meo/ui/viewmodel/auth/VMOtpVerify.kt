@@ -10,6 +10,7 @@ import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
+import org.thingai.android.module.meo.MeoSdk
 import javax.inject.Inject
 
 @HiltViewModel
@@ -17,7 +18,7 @@ class VMOtpVerify @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
 ) : ViewModel() {
     data class OtpVerificationUiState(
-        val phone: String = "",
+        val email: String = "",
         val otp: String = "",
         val isLoading: Boolean = false,
         val errorMessage: String? = null,
@@ -27,14 +28,14 @@ class VMOtpVerify @Inject constructor(
         val canVerify: Boolean get() = otp.length == 4 && !isLoading
     }
     companion object {
-        const val ARG_PHONE = "phone"
+        const val ARG_PHONE = "phone" // route arg kept for compatibility (contains email)
         private const val OTP_LENGTH = 4
         private const val RESEND_COOLDOWN = 30
     }
 
     private val _uiState = MutableStateFlow(
         OtpVerificationUiState(
-            phone = savedStateHandle.get<String>(ARG_PHONE).orEmpty()
+            email = savedStateHandle.get<String>(ARG_PHONE).orEmpty()
         )
     )
     val uiState: StateFlow<OtpVerificationUiState> = _uiState
@@ -46,17 +47,18 @@ class VMOtpVerify @Inject constructor(
         _uiState.update { it.copy(otp = digitsOnly, errorMessage = null) }
     }
 
-    fun verifyOtp(onVerified: (phone: String) -> Unit = {}) {
+    // Pass both email and otp to the caller so navigation can include both
+    fun verifyOtp(onVerified: (email: String, otp: String) -> Unit = { _, _ -> }) {
         val state = _uiState.value
         if (!state.canVerify) return
 
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                // TODO: Integrate with your service: authRepository.verifyOtp(state.phone, state.otp)
-                delay(800)
+                // local quick check; server-side OTP verification happens during reset
+                delay(300)
                 _uiState.update { it.copy(isLoading = false) }
-                onVerified(state.phone)
+                onVerified(state.email, state.otp)
             } catch (t: Throwable) {
                 _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: "Xác nhận thất bại") }
             }
@@ -69,9 +71,14 @@ class VMOtpVerify @Inject constructor(
 
         viewModelScope.launch {
             try {
-                // TODO: authRepository.sendOtp(state.phone)
-                _uiState.update { it.copy(resendEnabled = false, resendCountdownSeconds = RESEND_COOLDOWN) }
-                startCountdown()
+                val res = MeoSdk.authHandler().requestPasswordReset(state.email, null)
+                if (res.isSuccess) {
+                    _uiState.update { it.copy(resendEnabled = false, resendCountdownSeconds = RESEND_COOLDOWN) }
+                    startCountdown()
+                } else {
+                    val ex = res.exceptionOrNull()
+                    _uiState.update { it.copy(errorMessage = ex?.message ?: "Gửi lại mã thất bại") }
+                }
             } catch (t: Throwable) {
                 _uiState.update { it.copy(errorMessage = t.message ?: "Gửi lại mã thất bại") }
             }

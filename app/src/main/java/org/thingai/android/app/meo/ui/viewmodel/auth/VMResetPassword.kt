@@ -4,7 +4,6 @@ import androidx.lifecycle.SavedStateHandle
 import androidx.lifecycle.ViewModel
 import androidx.lifecycle.viewModelScope
 import dagger.hilt.android.lifecycle.HiltViewModel
-import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
@@ -14,15 +13,16 @@ import javax.inject.Inject
 @HiltViewModel
 class VMResetPassword @Inject constructor(
     private val savedStateHandle: SavedStateHandle,
-    // Inject your repo/service, e.g. private val authRepository: AuthRepository
 ) : ViewModel() {
 
     companion object {
-        const val ARG_PHONE = "phone"
+        const val ARG_PHONE = "phone" // route arg kept for compatibility (contains email)
+        const val ARG_OTP = "otp"
     }
 
     data class ResetPasswordUiState(
-        val phone: String = "",
+        val email: String = "",
+        val otp: String = "",
         val newPassword: String = "",
         val confirmPassword: String = "",
         val isLoading: Boolean = false,
@@ -38,7 +38,8 @@ class VMResetPassword @Inject constructor(
 
     private val _uiState = MutableStateFlow(
         ResetPasswordUiState(
-            phone = savedStateHandle.get<String>(ARG_PHONE).orEmpty()
+            email = savedStateHandle.get<String>(ARG_PHONE).orEmpty(),
+            otp = savedStateHandle.get<String>(ARG_OTP).orEmpty()
         )
     )
     val uiState: StateFlow<ResetPasswordUiState> = _uiState
@@ -61,16 +62,15 @@ class VMResetPassword @Inject constructor(
         viewModelScope.launch {
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
-                // TODO: Replace with real call, e.g. authRepository.updatePassword(state.phone, state.newPassword)
-                delay(800)
-                _uiState.update { it.copy(isLoading = false, isSaved = true) }
-            } catch (t: Throwable) {
-                _uiState.update {
-                    it.copy(
-                        isLoading = false,
-                        errorMessage = t.message ?: "Cập nhật mật khẩu thất bại"
-                    )
+                val res = org.thingai.android.module.meo.MeoSdk.authHandler().resetPassword(state.email, state.otp, state.newPassword)
+                if (res.isSuccess) {
+                    _uiState.update { it.copy(isLoading = false, isSaved = true) }
+                } else {
+                    val ex = res.exceptionOrNull()
+                    _uiState.update { it.copy(isLoading = false, errorMessage = ex?.message ?: "Cập nhật mật khẩu thất bại") }
                 }
+            } catch (t: Throwable) {
+                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: "Cập nhật mật khẩu thất bại") }
             }
         }
     }

@@ -19,6 +19,7 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import org.thingai.android.app.meo.navigation.Route
 import org.thingai.android.app.meo.ui.shared.appbar.BaseTopAppBar
+import org.thingai.android.app.meo.ui.shared.dialog.ErrorDialog
 import org.thingai.android.app.meo.ui.viewmodel.auth.VMOtpVerify
 
 @Composable
@@ -27,6 +28,13 @@ fun OtpVerifyScreen(
     vm: VMOtpVerify = hiltViewModel()
 ) {
     val ui = vm.uiState.collectAsStateWithLifecycle().value
+
+    // Error dialog
+    ErrorDialog(
+        show = ui.errorMessage != null,
+        message = ui.errorMessage,
+        onDismiss = { vm.clearError() }
+    )
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -56,7 +64,7 @@ fun OtpVerifyScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = "Enter the OTP code sent to ${ui.phone}.",
+                    text = "Enter the OTP code sent to ${ui.email}.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp)
@@ -91,18 +99,9 @@ fun OtpVerifyScreen(
 
                 Spacer(Modifier.height(12.dp))
 
-                if (ui.errorMessage != null) {
-                    Text(
-                        text = ui.errorMessage,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    Spacer(Modifier.height(8.dp))
-                }
-
                 Button(
-                    onClick = { vm.verifyOtp({
-                        navController.navigate(Route.RESET_PASSWORD+"?phone=${ui.phone}")
+                    onClick = { vm.verifyOtp({ email, otp ->
+                        navController.navigate(Route.RESET_PASSWORD+"?phone=${email}&otp=${otp}")
                     }) },
                     enabled = ui.canVerify && !ui.isLoading,
                     modifier = Modifier

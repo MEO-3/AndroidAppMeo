@@ -4,7 +4,7 @@ import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.outlined.Phone
+import androidx.compose.material.icons.outlined.Email
 import androidx.compose.material3.*
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
@@ -17,6 +17,8 @@ import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
 import org.thingai.android.app.meo.navigation.Route
 import org.thingai.android.app.meo.ui.shared.appbar.BaseTopAppBar
+import org.thingai.android.app.meo.ui.shared.dialog.ErrorDialog
+import org.thingai.android.app.meo.ui.shared.dialog.SuccessDialog
 import org.thingai.android.app.meo.ui.viewmodel.auth.VMForgotPassword
 
 @Composable
@@ -26,13 +28,27 @@ fun ForgotPasswordScreen(
 ) {
     val ui = vm.uiState.collectAsStateWithLifecycle().value
 
-    // Navigate when code is sent
-    if (ui.isCodeSent) {
-        val route: String = Route.VERIFY_OTP + "?phone=${ui.phone}"
-        navController.navigate(route) {
-            popUpTo(Route.FORGOT_PASSWORD) { inclusive = true }
+    // Success dialog when code is sent — navigate to OTP when user confirms
+    SuccessDialog(
+        show = ui.isCodeSent,
+        title = "OTP sent",
+        message = "An OTP code has been sent to ${ui.email}.",
+        onDismiss = { vm.clearCodeSent() },
+        onConfirm = {
+            vm.clearCodeSent()
+            val route: String = Route.VERIFY_OTP + "?phone=${ui.email}"
+            navController.navigate(route) {
+                popUpTo(Route.FORGOT_PASSWORD) { inclusive = true }
+            }
         }
-    }
+    )
+
+    // Error dialog
+    ErrorDialog(
+        show = ui.errorMessage != null,
+        message = ui.errorMessage,
+        onDismiss = { vm.clearError() }
+    )
 
     Surface(
         modifier = Modifier.fillMaxSize(),
@@ -61,7 +77,7 @@ fun ForgotPasswordScreen(
                     color = MaterialTheme.colorScheme.primary
                 )
                 Text(
-                    text = "Enter phone number to receive code.",
+                    text = "Enter email to receive code.",
                     style = MaterialTheme.typography.bodyMedium,
                     color = MaterialTheme.colorScheme.onSurfaceVariant,
                     modifier = Modifier.padding(top = 8.dp)
@@ -70,35 +86,27 @@ fun ForgotPasswordScreen(
                 Spacer(Modifier.height(24.dp))
 
                 OutlinedTextField(
-                    value = ui.phone,
-                    onValueChange = { vm.onPhoneChanged(it) },
+                    value = ui.email,
+                    onValueChange = { vm.onEmailChanged(it) },
                     modifier = Modifier.fillMaxWidth(),
                     singleLine = true,
                     shape = MaterialTheme.shapes.large,
                     leadingIcon = {
                         Icon(
-                            imageVector = Icons.Outlined.Phone,
-                            contentDescription = "Phone",
+                            imageVector = Icons.Outlined.Email,
+                            contentDescription = "Email",
                             tint = MaterialTheme.colorScheme.onSurfaceVariant
                         )
                     },
-                    placeholder = { Text("Enter phone number") },
+                    placeholder = { Text("Enter email") },
                     keyboardOptions = KeyboardOptions(
-                        keyboardType = KeyboardType.Phone,
+                        keyboardType = KeyboardType.Email,
                         imeAction = ImeAction.Done
                     )
                 )
 
                 Spacer(Modifier.height(16.dp))
 
-                if (ui.errorMessage != null) {
-                    Text(
-                        text = ui.errorMessage,
-                        color = MaterialTheme.colorScheme.error,
-                        style = MaterialTheme.typography.bodySmall
-                    )
-                    Spacer(Modifier.height(8.dp))
-                }
 
                 Button(
                     onClick = { vm.sendCode() },
