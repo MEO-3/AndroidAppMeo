@@ -72,8 +72,7 @@ dependencies {
     debugImplementation(libs.androidx.compose.ui.test.manifest)
 
     implementation(libs.androidx.compose.material.icons.extended)
-
-
+    implementation(libs.androidx.core.splashscreen)
 
     // Room runtime
     implementation(libs.androidx.room.ktx)

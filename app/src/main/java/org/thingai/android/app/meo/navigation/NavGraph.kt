@@ -23,7 +23,7 @@ const val ANIM_DURATION = 300
 fun AppNavGraph(navController: NavHostController, modifier: Modifier = Modifier) {
     NavHost(
         navController = navController,
-        startDestination = Route.LOGIN,
+        startDestination = Route.DEVICE_LIST,
         modifier = modifier,
         // Slide animation
         enterTransition = {
