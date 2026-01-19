@@ -55,8 +55,6 @@ class MeoSdk private constructor(
         fun init(appContext: Context) {
             instance = MeoSdk(appContext.applicationContext)
             instance.init()
-
-            ILog.d("MeoSdk", "init")
         }
 
         fun authHandler(): AuthHandler {
