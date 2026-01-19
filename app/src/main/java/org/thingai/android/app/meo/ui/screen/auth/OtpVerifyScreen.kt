@@ -78,7 +78,8 @@ fun OtpVerifyScreen(
                     OtpCodeField(
                         value = ui.otp,
                         onValueChange = vm::onOtpChanged,
-                        modifier = Modifier.padding(vertical = 8.dp)
+                        length = 6,
+                        modifier = Modifier.padding(vertical = 8.dp).fillMaxWidth()
                     )
                     Spacer(Modifier.height(12.dp))
                     Row(
@@ -132,10 +133,10 @@ fun OtpVerifyScreen(
 
 @Composable
 fun OtpCodeField(
+    modifier: Modifier = Modifier,
     value: String,
     onValueChange: (String) -> Unit,
     length: Int = 4,
-    modifier: Modifier = Modifier,
 ) {
     BasicTextField(
         value = value,
@@ -149,7 +150,7 @@ fun OtpCodeField(
                     val char = value.getOrNull(index)?.toString() ?: ""
                     Box(
                         modifier = Modifier
-                            .size(56.dp)
+                            .size(48.dp)
                             .clip(RoundedCornerShape(16.dp))
                             .border(
                                 width = 1.dp,

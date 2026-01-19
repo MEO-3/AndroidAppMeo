@@ -11,6 +11,7 @@ import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import org.thingai.android.module.meo.MeoSdk
+import org.thingai.meo.common.define.MOtpPurpose
 import javax.inject.Inject
 
 @HiltViewModel
@@ -25,11 +26,11 @@ class VMOtpVerify @Inject constructor(
         val resendEnabled: Boolean = true,
         val resendCountdownSeconds: Int = 0,
     ) {
-        val canVerify: Boolean get() = otp.length == 4 && !isLoading
+        val canVerify: Boolean get() = otp.length == OTP_LENGTH && !isLoading
     }
     companion object {
         const val ARG_PHONE = "phone" // route arg kept for compatibility (contains email)
-        private const val OTP_LENGTH = 4
+        private const val OTP_LENGTH = 6
         private const val RESEND_COOLDOWN = 30
     }
 
@@ -56,11 +57,16 @@ class VMOtpVerify @Inject constructor(
             _uiState.update { it.copy(isLoading = true, errorMessage = null) }
             try {
                 // local quick check; server-side OTP verification happens during reset
-                delay(300)
+                val res = MeoSdk.authHandler().verifyOtp(state.email, state.otp, MOtpPurpose.PASSWORD_RESET)
+                if (!res.isSuccess) {
+                    val ex = res.exceptionOrNull()
+                    _uiState.update { it.copy(errorMessage = ex?.message ?: "OTP verification failed") }
+                    return@launch
+                }
                 _uiState.update { it.copy(isLoading = false) }
                 onVerified(state.email, state.otp)
             } catch (t: Throwable) {
-                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: "Xác nhận thất bại") }
+                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: "OTP verification failed") }
             }
         }
     }
@@ -77,10 +83,10 @@ class VMOtpVerify @Inject constructor(
                     startCountdown()
                 } else {
                     val ex = res.exceptionOrNull()
-                    _uiState.update { it.copy(errorMessage = ex?.message ?: "Gửi lại mã thất bại") }
+                    _uiState.update { it.copy(errorMessage = ex?.message ?: "Resend OTP failed") }
                 }
             } catch (t: Throwable) {
-                _uiState.update { it.copy(errorMessage = t.message ?: "Gửi lại mã thất bại") }
+                _uiState.update { it.copy(errorMessage = t.message ?: "Resend OTP failed") }
             }
         }
     }

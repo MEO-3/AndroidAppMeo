@@ -4,6 +4,7 @@ import com.google.gson.Gson
 import org.thingai.android.module.meo.handler.auth.internal.AuthApi
 import org.thingai.android.module.meo.handler.auth.internal.AuthPrefs
 import org.thingai.base.log.ILog
+import org.thingai.meo.common.define.MOtpPurpose
 import org.thingai.meo.common.dto.ResponseError
 import org.thingai.meo.common.dto.auth.RequestLogin
 import org.thingai.meo.common.dto.auth.RequestRefresh
@@ -12,6 +13,7 @@ import org.thingai.meo.common.dto.auth.ResponseAuth
 import org.thingai.meo.common.dto.otp.RequestOtpCreate
 import org.thingai.meo.common.dto.otp.RequestResetPasswordConfirm
 import org.thingai.meo.common.dto.ResponseOk
+import org.thingai.meo.common.dto.otp.RequestOtpVerify
 import retrofit2.Response
 
 class AuthHandler internal constructor(
@@ -71,12 +73,28 @@ class AuthHandler internal constructor(
         }
     }
 
+    suspend fun verifyOtp(email: String, otp: String, purpose: Int): Result<ResponseOk> {
+        return try {
+            val requestBody = RequestOtpVerify()
+            requestBody.email = email
+            requestBody.otp = otp
+            requestBody.purpose = purpose
+
+            val response = api.verifyOtp(requestBody)
+            handleOtpCreateResponse(response)
+        } catch (t: Throwable) {
+            t.printStackTrace()
+            ILog.e(TAG, "failed", t.message)
+            Result.failure(t)
+        }
+    }
+
     // Request a password-reset OTP. Purpose is forced to 1 by the caller
     suspend fun requestPasswordReset(email: String, ttlMinutes: Int? = null): Result<ResponseOk> {
         return try {
             val requestBody = RequestOtpCreate()
             requestBody.email = email
-            requestBody.purpose = 1
+            requestBody.purpose = MOtpPurpose.PASSWORD_RESET
             if (ttlMinutes != null) requestBody.ttlMinutes = ttlMinutes.toString()
 
             val response = api.requestPasswordReset(requestBody)

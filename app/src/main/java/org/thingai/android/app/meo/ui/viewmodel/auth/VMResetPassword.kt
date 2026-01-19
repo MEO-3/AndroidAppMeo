@@ -55,7 +55,7 @@ class VMResetPassword @Inject constructor(
     fun saveNewPassword() {
         val state = _uiState.value
         if (!state.isValid) {
-            _uiState.update { it.copy(errorMessage = "Mật khẩu không hợp lệ hoặc không khớp") }
+            _uiState.update { it.copy(errorMessage = "Password does not match") }
             return
         }
 
@@ -67,10 +67,10 @@ class VMResetPassword @Inject constructor(
                     _uiState.update { it.copy(isLoading = false, isSaved = true) }
                 } else {
                     val ex = res.exceptionOrNull()
-                    _uiState.update { it.copy(isLoading = false, errorMessage = ex?.message ?: "Cập nhật mật khẩu thất bại") }
+                    _uiState.update { it.copy(isLoading = false, errorMessage = ex?.message ?: "Reset password failed") }
                 }
             } catch (t: Throwable) {
-                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: "Cập nhật mật khẩu thất bại") }
+                _uiState.update { it.copy(isLoading = false, errorMessage = t.message ?: "Reset password failed") }
             }
         }
     }
