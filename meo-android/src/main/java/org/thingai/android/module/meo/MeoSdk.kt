@@ -6,15 +6,17 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
+import org.thingai.android.module.meo.ble.impl.MBleClientImpl
 import org.thingai.android.module.meo.handler.auth.AuthHandler
 import org.thingai.android.module.meo.handler.auth.internal.AuthApi
 import org.thingai.android.module.meo.handler.auth.internal.AuthInterceptor
 import org.thingai.android.module.meo.handler.auth.internal.AuthPrefs
 import org.thingai.android.module.meo.handler.auth.internal.TokenAuthenticator
+import org.thingai.android.module.meo.handler.discovery.MDeviceDiscoveryBleHandlerImpl
 import org.thingai.base.log.ILog
 import org.thingai.meo.common.callback.RequestCallback
-import org.thingai.meo.common.handler.MDeviceDiscoveryBleHandler
-import org.thingai.meo.common.handler.MDeviceDiscoveryLanHandler
+import org.thingai.meo.common.handler.MDeviceDiscoveryHandlerBle
+import org.thingai.meo.common.handler.MDeviceDiscoveryHandlerLan
 import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
@@ -26,8 +28,9 @@ class MeoSdk private constructor(
 
     private lateinit var retrofit: Retrofit
     private lateinit var authHandler: AuthHandler
-    private lateinit var bleDiscoveryHandler: MDeviceDiscoveryBleHandler
-    private lateinit var lanDiscoveryHandler: MDeviceDiscoveryLanHandler
+    private lateinit var bleDiscoveryHandler: MDeviceDiscoveryHandlerBle
+    private lateinit var lanDiscoveryHandler: MDeviceDiscoveryHandlerLan
+
 
     private fun init() {
         ILog.d(TAG, "init")
@@ -50,6 +53,7 @@ class MeoSdk private constructor(
 
         // 4. Init handlers
         authHandler = AuthHandler(retrofit.create(AuthApi::class.java), authPrefs)
+        bleDiscoveryHandler = MDeviceDiscoveryBleHandlerImpl(MBleClientImpl(appContext))
 
         instance = this
     }
@@ -115,6 +119,10 @@ class MeoSdk private constructor(
                 return
             }
             instance.connect(callback)
+        }
+
+        fun bleDiscoveryHandler(): MDeviceDiscoveryHandlerBle {
+            return instance.bleDiscoveryHandler
         }
     }
 }

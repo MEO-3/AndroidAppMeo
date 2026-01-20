@@ -15,6 +15,7 @@ import org.thingai.android.app.meo.ui.screen.auth.ForgotPasswordScreen
 import org.thingai.android.app.meo.ui.screen.auth.LoginScreen
 import org.thingai.android.app.meo.ui.screen.auth.ResetPasswordScreen
 import org.thingai.android.app.meo.ui.screen.auth.SignUpScreen
+import org.thingai.android.app.meo.ui.screen.device.AddDeviceScreen
 import org.thingai.android.app.meo.ui.screen.device.DeviceListScreen
 
 const val ANIM_DURATION = 300
@@ -69,6 +70,7 @@ fun AppNavGraph(navController: NavHostController, modifier: Modifier = Modifier)
             }
         )) { ResetPasswordScreen(navController) }
         composable(Route.DEVICE_LIST) { DeviceListScreen(navController) }
+        composable(Route.DEVICE_ADDDEVICE) { AddDeviceScreen(navController) }
     }
 }
 

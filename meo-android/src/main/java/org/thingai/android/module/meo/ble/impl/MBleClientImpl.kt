@@ -27,6 +27,7 @@ class MBleClientImpl(private val app: Context): MBleClient {
 
     @SuppressLint("MissingPermission")
     override fun scanForConfigDevices(): Flow<List<MDeviceConfigBle>> {
+        ILog.d(TAG, "scanForConfigDevices")
         val manager = app.getSystemService(BluetoothManager::class.java)
             ?: return callbackFlow { trySend(emptyList()); awaitClose {} }
         val adapter = manager.adapter ?: return callbackFlow { trySend(emptyList()); awaitClose {} }
@@ -77,6 +78,7 @@ class MBleClientImpl(private val app: Context): MBleClient {
 
     @SuppressLint("MissingPermission")
     override suspend fun connect(address: String): MBleSession {
+        ILog.d(TAG, "connect", address)
         // Reuse session if exists
         val existing = sessions[address]
         if (existing != null) {

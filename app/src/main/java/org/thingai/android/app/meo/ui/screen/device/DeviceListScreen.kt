@@ -22,6 +22,7 @@ import androidx.compose.ui.window.DialogProperties
 import androidx.hilt.lifecycle.viewmodel.compose.hiltViewModel
 import androidx.lifecycle.compose.collectAsStateWithLifecycle
 import androidx.navigation.NavController
+import org.thingai.android.app.meo.navigation.Route
 import org.thingai.android.app.meo.ui.shared.custom.DialogPosition
 import org.thingai.android.app.meo.ui.shared.dialog.BaseDialog
 import org.thingai.android.app.meo.ui.viewmodel.device.VMDeviceList
@@ -38,6 +39,7 @@ fun DeviceListScreen(
 
     DeviceTypeSelectDialog(
         show = showDeviceTypeSelectDialog.value,
+        navController = navController,
         onDismiss = { showDeviceTypeSelectDialog.value = false }
     )
 
@@ -80,6 +82,7 @@ fun DeviceListScreen(
 @Composable
 private fun DeviceTypeSelectDialog(
     show: Boolean,
+    navController: NavController,
     onDismiss: () -> Unit,
 ) {
     if (!show) return
@@ -174,7 +177,7 @@ private fun DeviceTypeSelectDialog(
                     }
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = { }
+                        onClick = { navController.navigate(Route.DEVICE_ADDDEVICE) }
                     ) {
                         Row(
                             modifier = Modifier
