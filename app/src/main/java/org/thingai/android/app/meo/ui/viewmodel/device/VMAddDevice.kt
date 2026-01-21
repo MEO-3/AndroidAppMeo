@@ -101,6 +101,19 @@ class VMAddDevice @Inject constructor() : ViewModel() {
         callbackRegistered = false
     }
 
+    fun clearError() {
+        viewModelScope.launch(Dispatchers.Main) {
+            _ui.value = _ui.value.copy(error = null, scanning = false)
+        }
+        try {
+            // also ensure scanning is stopped
+            MeoSdk.bleDiscoveryHandler().closeDiscovery()
+        } catch (t: Throwable) {
+            ILog.e(TAG, "clearError stopScan error: ${t.message}")
+        }
+        callbackRegistered = false
+    }
+
     fun connectToDevice(device: MDeviceConfigBle) {
         // Stop scanning while connecting
         stopScan()

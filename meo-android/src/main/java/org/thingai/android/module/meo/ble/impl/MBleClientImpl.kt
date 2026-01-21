@@ -96,8 +96,6 @@ class MBleClientImpl(private val app: Context): MBleClient {
                 item.bleName = result.scanRecord?.deviceName ?: d.address
                 item.rssi = result.rssi
 
-                ILog.d(TAG, "scan", "${item.isHasConfigService}")
-
                 cb.onDeviceFound(item)
             }
 

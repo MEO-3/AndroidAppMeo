@@ -28,6 +28,9 @@ class MDeviceDiscoveryBleHandlerImpl(
     private var bleSession: MBleSession? = null
     private var scanJob: Job? = null
 
+    // Keep track of seen device addresses so we only notify once per device
+    private val seenAddresses = mutableSetOf<String>()
+
     override fun scanWifi(p0: RequestCallback<Array<out MWifiInfo?>?>?) {
         TODO("Not yet implemented")
     }
@@ -44,18 +47,46 @@ class MDeviceDiscoveryBleHandlerImpl(
         // Already scanning
         if (scanJob != null) return false
 
+        // Clear seen set when starting a fresh discovery
+        synchronized(seenAddresses) { seenAddresses.clear() }
+
         scanJob = scope.launch {
             try {
                 bleClient.scan(object : MBleScanCallback {
                     override fun onDeviceFound(device: MDeviceConfigBle) {
                         try {
-                            ILog.d(TAG, "device found: ${device.bleAddress}")
-                            // Notify higher-level callback about discovered device
-                            try {
-                                setupDeviceCallback.onDeviceFound(device)
-                            } catch (t: Throwable) {
-                                ILog.e(TAG, "notify onDeviceFound failed: ${t.message}")
+                            val addr = device.bleAddress ?: ""
+                            if (addr.isBlank()) {
+                                // Unknown address - still notify once
+                                synchronized(seenAddresses) {
+                                    if (seenAddresses.add("__unknown__")) {
+                                        try {
+                                            setupDeviceCallback.onDeviceFound(device)
+                                        } catch (t: Throwable) {
+                                            ILog.e(TAG, "notify onDeviceFound failed: ${t.message}")
+                                        }
+                                    }
+                                }
+                                return
                             }
+
+                            var first = false
+                            synchronized(seenAddresses) {
+                                if (!seenAddresses.contains(addr)) {
+                                    seenAddresses.add(addr)
+                                    first = true
+                                }
+                            }
+
+                            if (first) {
+                                ILog.d(TAG, "device first found: $addr")
+                                try {
+                                    setupDeviceCallback.onDeviceFound(device)
+                                } catch (t: Throwable) {
+                                    ILog.e(TAG, "notify onDeviceFound failed: ${t.message}")
+                                }
+                            }
+
                         } catch (t: Throwable) {
                             ILog.e(TAG, "onDeviceFound error: ${t.message}")
                         }
@@ -90,6 +121,8 @@ class MDeviceDiscoveryBleHandlerImpl(
         }
         scanJob?.cancel()
         scanJob = null
+        // clear seen addresses so next discovery can notify again
+        synchronized(seenAddresses) { seenAddresses.clear() }
         return true
     }
 
