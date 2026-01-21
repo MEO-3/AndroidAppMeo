@@ -22,8 +22,8 @@ fun BaseTopAppBar(
     title: String? = null,
     onBack: () -> Unit,
     colors: TopAppBarColors = TopAppBarDefaults.topAppBarColors(
-        containerColor = MaterialTheme.colorScheme.primaryContainer,
-        titleContentColor = MaterialTheme.colorScheme.onPrimaryContainer
+        containerColor = MaterialTheme.colorScheme.background,
+        titleContentColor = MaterialTheme.colorScheme.onBackground
     )
 ) {
     TopAppBar(

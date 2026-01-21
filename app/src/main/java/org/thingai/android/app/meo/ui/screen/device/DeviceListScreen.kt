@@ -159,7 +159,7 @@ private fun DeviceTypeSelectDialog(
                     }
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = { }
+                        onClick = { navController.navigate(Route.DEVICE_ADDDEVICE) }
                     ) {
                         Row(
                             modifier = Modifier
@@ -177,7 +177,7 @@ private fun DeviceTypeSelectDialog(
                     }
                     Card(
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = { navController.navigate(Route.DEVICE_ADDDEVICE) }
+                        onClick = { }
                     ) {
                         Row(
                             modifier = Modifier

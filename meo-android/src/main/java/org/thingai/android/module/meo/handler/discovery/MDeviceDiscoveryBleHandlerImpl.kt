@@ -4,14 +4,9 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.SupervisorJob
-import kotlinx.coroutines.flow.Flow
-import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.asStateFlow
-import kotlinx.coroutines.flow.callbackFlow
-import kotlinx.coroutines.flow.catch
-import kotlinx.coroutines.flow.onEach
 import kotlinx.coroutines.launch
 import org.thingai.android.module.meo.ble.MBleClient
+import org.thingai.android.module.meo.ble.MBleScanCallback
 import org.thingai.android.module.meo.ble.MBleSession
 import org.thingai.android.module.meo.util.ByteUtils
 import org.thingai.base.log.ILog
@@ -30,13 +25,8 @@ class MDeviceDiscoveryBleHandlerImpl(
     private val TAG = "MDeviceDiscoveryBleHandler"
 
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
-
-    private var listDiscoveryDevice = mutableListOf<MDeviceConfigBle>()
     private var bleSession: MBleSession? = null
     private var scanJob: Job? = null
-
-    private val _connected = MutableStateFlow(false)
-    val isConnected: Flow<Boolean> = _connected.asStateFlow()
 
     override fun scanWifi(p0: RequestCallback<Array<out MWifiInfo?>?>?) {
         TODO("Not yet implemented")
@@ -51,28 +41,53 @@ class MDeviceDiscoveryBleHandlerImpl(
     }
 
     override fun discovery(): Boolean {
-        scanJob = bleClient.scanForConfigDevices()
-            .onEach { list ->
-                listDiscoveryDevice.clear()
-                listDiscoveryDevice.addAll(list)
-                ILog.d(TAG, "discovery: $listDiscoveryDevice")
-            }
-            .catch { exception ->
-                ILog.e(TAG, "discovery: $exception")
-                return@catch
-            }.let { flow ->
-                scope.launch {
-                    flow.collect {
-                        listDiscoveryDevice.forEach { device ->
-                            setupDeviceCallback.onDeviceFound(device)
+        // Already scanning
+        if (scanJob != null) return false
+
+        scanJob = scope.launch {
+            try {
+                bleClient.scan(object : MBleScanCallback {
+                    override fun onDeviceFound(device: MDeviceConfigBle) {
+                        try {
+                            ILog.d(TAG, "device found: ${device.bleAddress}")
+                            // Notify higher-level callback about discovered device
+                            try {
+                                setupDeviceCallback.onDeviceFound(device)
+                            } catch (t: Throwable) {
+                                ILog.e(TAG, "notify onDeviceFound failed: ${t.message}")
+                            }
+                        } catch (t: Throwable) {
+                            ILog.e(TAG, "onDeviceFound error: ${t.message}")
                         }
                     }
-                }
+
+                    override fun onScanFailed(errorCode: Int, message: String) {
+                        ILog.d(TAG, "scan failed: $errorCode $message")
+                        try {
+                            setupDeviceCallback.onSetupFailed(errorCode, message)
+                        } catch (t: Throwable) {
+                            ILog.e(TAG, "notify onScanFailed failed: ${t.message}")
+                        }
+                        // stop scan on failure
+                        try { bleClient.stopScan() } catch (t: Throwable) { ILog.e(TAG, "stopScan failed: ${t.message}") }
+                    }
+                })
+            } catch (t: Throwable) {
+                ILog.e(TAG, "discovery exception: ${t.message}")
+                try { setupDeviceCallback.onSetupFailed(-1, t.message ?: "Discovery exception") } catch (_: Throwable) {}
             }
+        }
+
         return true
     }
 
     override fun closeDiscovery(): Boolean {
+        // stop scanning via ble client
+        try {
+            bleClient.stopScan()
+        } catch (t: Throwable) {
+            ILog.e(TAG, "stopScan error: ${t.message}")
+        }
         scanJob?.cancel()
         scanJob = null
         return true
@@ -86,10 +101,7 @@ class MDeviceDiscoveryBleHandlerImpl(
             bleSession?.close()
             bleSession = bleClient.connect(p0!!.bleAddress)
             bleSession!!.isConnected.collect { isConnected ->
-                if (isConnected) {
-                    _connected.value = true
-                } else {
-                    _connected.value = false
+                if (!isConnected) {
                     ILog.d(TAG, "connectAndIdentifyDevice: $isConnected")
                     p1?.onFailure(2, "Unable to connect to device")
                     setupDeviceCallback.onSetupFailed(2, "Unable to connect to device")
