@@ -8,7 +8,7 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import org.thingai.android.module.meo.ble.impl.MBleClientImpl
 import org.thingai.android.module.meo.handler.auth.AuthHandler
-import org.thingai.android.module.meo.handler.auth.internal.AuthApi
+import org.thingai.android.module.meo.cloud.AuthApi
 import org.thingai.android.module.meo.handler.auth.internal.AuthInterceptor
 import org.thingai.android.module.meo.handler.auth.internal.AuthPrefs
 import org.thingai.android.module.meo.handler.auth.internal.TokenAuthenticator

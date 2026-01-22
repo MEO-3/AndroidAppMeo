@@ -1,4 +1,4 @@
-package org.thingai.android.module.meo.handler.auth.internal
+package org.thingai.android.module.meo.cloud
 
 import org.thingai.meo.common.dto.ResponseOk
 import org.thingai.meo.common.dto.auth.RequestLogin

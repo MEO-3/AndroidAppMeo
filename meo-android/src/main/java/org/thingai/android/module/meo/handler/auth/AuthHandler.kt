@@ -1,7 +1,7 @@
 package org.thingai.android.module.meo.handler.auth
 
 import com.google.gson.Gson
-import org.thingai.android.module.meo.handler.auth.internal.AuthApi
+import org.thingai.android.module.meo.cloud.AuthApi
 import org.thingai.android.module.meo.handler.auth.internal.AuthPrefs
 import org.thingai.base.log.ILog
 import org.thingai.meo.common.define.MOtpPurpose
