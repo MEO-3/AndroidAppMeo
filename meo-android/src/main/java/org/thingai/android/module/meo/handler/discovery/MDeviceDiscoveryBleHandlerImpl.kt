@@ -147,6 +147,9 @@ class MDeviceDiscoveryBleHandlerImpl(
                 deviceInfo.macAddress = ByteUtils.bytesToString(bleSession!!.read(MBleUuid.CH_UUID_MAC_ADDR))
                 deviceInfo.buildInfo = ByteUtils.bytesToString(bleSession!!.read(MBleUuid.CH_UUID_BUILD_INFO))
 
+                ILog.d(TAG, "connectAndIdentifyDevice", deviceInfo.macAddress, deviceInfo.buildInfo)
+                setupDeviceCallback.onDeviceIdentifiedAndReady(deviceInfo)
+
                 p1?.onSuccess(
                     deviceInfo,
                     "Connected to device"
