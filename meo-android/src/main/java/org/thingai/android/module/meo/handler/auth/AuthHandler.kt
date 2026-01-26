@@ -59,6 +59,7 @@ class AuthHandler internal constructor(
     }
 
     suspend fun refresh(refreshToken: String? = null): Result<ResponseAuth> {
+        ILog.d(TAG, "refresh")
         return try {
             val tokenToUse = refreshToken ?: prefs.getRefreshToken()
                 ?: return Result.failure(Exception("No refresh token available"))
@@ -144,6 +145,7 @@ class AuthHandler internal constructor(
     }
 
     private suspend fun handleResponse(response: Response<ResponseAuth>): Result<ResponseAuth> {
+        ILog.d(TAG, "handleResponse", response.code().toString())
         val statusCode = response.code()
         return if (response.isSuccessful) {
             val authResponse = response.body()!!

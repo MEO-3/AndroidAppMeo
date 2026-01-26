@@ -38,6 +38,11 @@ class MeoSdk private constructor(
         // 1. Init Internal Prefs
         val authPrefs = AuthPrefs(appContext)
 
+        // Init separated auth http client to avoid deadlock on refresh
+        val authHttpClient = OkHttpClient.Builder()
+            .addInterceptor(AuthInterceptor(authPrefs))
+            .build()
+
         // 2. Build OkHttpClient with Interceptor and Authenticator
         val okHttpClient = OkHttpClient.Builder()
             .addInterceptor(AuthInterceptor(authPrefs))
@@ -45,6 +50,12 @@ class MeoSdk private constructor(
             .build()
 
         // 3. Init Retrofit
+        val authRetrofit = Retrofit.Builder()
+            .baseUrl(BASE_CLOUD_URL)
+            .client(authHttpClient)
+            .addConverterFactory(GsonConverterFactory.create())
+            .build()
+
         retrofit = Retrofit.Builder()
             .baseUrl(BASE_CLOUD_URL)
             .client(okHttpClient)
@@ -52,7 +63,7 @@ class MeoSdk private constructor(
             .build()
 
         // 4. Init handlers
-        authHandler = AuthHandler(retrofit.create(AuthApi::class.java), authPrefs)
+        authHandler = AuthHandler(authRetrofit.create(AuthApi::class.java), authPrefs)
         bleDiscoveryHandler = MDeviceDiscoveryBleHandlerImpl(MBleClientImpl(appContext))
 
         instance = this

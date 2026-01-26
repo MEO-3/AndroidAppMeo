@@ -31,7 +31,7 @@ class MDeviceDiscoveryBleHandlerImpl(
     // Keep track of seen device addresses so we only notify once per device
     private val seenAddresses = mutableSetOf<String>()
 
-    override fun scanWifi(p0: RequestCallback<Array<out MWifiInfo?>?>?) {
+    override fun scanWifi(p0: RequestCallback<Array<MWifiInfo>>) {
         TODO("Not yet implemented")
     }
 
