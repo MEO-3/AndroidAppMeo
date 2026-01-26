@@ -24,7 +24,8 @@ class VMAddDevice @Inject constructor() : ViewModel() {
         val devices: List<MDeviceConfigBle> = emptyList(),
         val error: String? = null,
         val loadingWifiList: Boolean = false,
-        val deviceId: String = ""
+        val deviceId: String = "",
+        val provisioning: Boolean = false
     )
 
     private val _ui = MutableStateFlow(UiState())
@@ -136,6 +137,66 @@ class VMAddDevice @Inject constructor() : ViewModel() {
                 ILog.e(TAG, "connectToDevice error: ${t.message}")
                 viewModelScope.launch(Dispatchers.Main) {
                     _ui.value = _ui.value.copy(error = t.message ?: "Connect error")
+                }
+            }
+        }
+    }
+
+    /**
+     * Provision device to wifi via BLE. This method calls underlying bleDiscoveryHandler.connectWifi
+     * and updates UI provisioning state and error message based on callback.
+     */
+    fun connectWifi(ssid: String, password: String) {
+        viewModelScope.launch(Dispatchers.IO) {
+            viewModelScope.launch(Dispatchers.Main) { _ui.value = _ui.value.copy(provisioning = true, error = null) }
+            try {
+                MeoSdk.bleDiscoveryHandler().connectWifi(ssid, password, object: RequestCallback<Boolean?> {
+                    override fun onSuccess(var1: Boolean?, var2: String) {
+                        viewModelScope.launch(Dispatchers.Main) {
+                            _ui.value = _ui.value.copy(provisioning = false)
+                            // onSuccess true indicates connected; we could clear deviceId or leave as-is
+                        }
+                    }
+
+                    override fun onFailure(var1: Int, var2: String) {
+                        viewModelScope.launch(Dispatchers.Main) {
+                            _ui.value = _ui.value.copy(provisioning = false, error = var2)
+                        }
+                    }
+                })
+            } catch (t: Throwable) {
+                ILog.e(TAG, "connectWifi error: ${t.message}")
+                viewModelScope.launch(Dispatchers.Main) {
+                    _ui.value = _ui.value.copy(provisioning = false, error = t.message ?: "Provisioning error")
+                }
+            }
+        }
+    }
+
+    /**
+     * Cancel any ongoing provisioning and reset provisioning state.
+     */
+    fun cancelProvisioning() {
+        viewModelScope.launch(Dispatchers.IO) {
+            try {
+                // Try to cancel at handler level if available
+                try {
+                    MeoSdk.bleDiscoveryHandler().let { handler ->
+                        // call cancelProvisioning if the implementation exposes it
+                        try {
+                            val method = handler::class.java.getMethod("cancelProvisioning")
+                            method.invoke(handler)
+                        } catch (_: NoSuchMethodException) {
+                            // Method not available; ignore
+                        }
+                    }
+                } catch (_: Throwable) {
+                    // ignore
+                }
+            } finally {
+                // Ensure UI state is updated on main thread
+                viewModelScope.launch(Dispatchers.Main) {
+                    _ui.value = _ui.value.copy(provisioning = false, deviceId = "")
                 }
             }
         }

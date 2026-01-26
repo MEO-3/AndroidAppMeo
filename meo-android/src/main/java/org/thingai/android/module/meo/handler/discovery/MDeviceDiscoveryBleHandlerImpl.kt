@@ -173,4 +173,11 @@ class MDeviceDiscoveryBleHandlerImpl(
     ) {
         TODO("Not yet implemented")
     }
+
+    fun cancelProvisioning() {
+        scope.launch {
+            bleSession?.close()
+            bleSession = null
+        }
+    }
 }

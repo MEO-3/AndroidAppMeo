@@ -29,7 +29,22 @@ import org.thingai.android.app.meo.ui.viewmodel.device.VMAddDevice
 import org.thingai.meo.common.entity.device.MDeviceConfigBle
 import androidx.core.content.ContextCompat
 import android.content.pm.PackageManager
+import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Close
+import androidx.compose.ui.text.font.FontWeight
 import androidx.lifecycle.compose.LocalLifecycleOwner
+import org.thingai.android.app.meo.ui.shared.dialog.BaseDialog
+import androidx.compose.ui.platform.LocalFocusManager
+import androidx.compose.ui.platform.LocalSoftwareKeyboardController
+import androidx.compose.material.icons.filled.Wifi
+import androidx.compose.material.icons.filled.Lock
+import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.VisibilityOff
+import androidx.compose.foundation.text.KeyboardOptions
+import androidx.compose.ui.text.input.ImeAction
+import androidx.compose.ui.text.input.KeyboardType
+import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.text.input.VisualTransformation
 
 enum class RequirementType { PERMISSION, BLUETOOTH, LOCATION }
 
@@ -68,6 +83,11 @@ fun AddDeviceScreen(navController: NavController, vm: VMAddDevice = hiltViewMode
     // Dialog state: which requirement to show when Start pressed
     var showRequirementDialog by remember { mutableStateOf(false) }
     var currentRequirement by remember { mutableStateOf<RequirementType?>(null) }
+
+    // WiFi config dialog state
+    var showWifiDialog by remember { mutableStateOf(false) }
+    var ssid by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
 
     // Permission launcher (moved after state vars so it can update permissionGranted)
     val permissionLauncher = rememberLauncherForActivityResult(
@@ -112,6 +132,18 @@ fun AddDeviceScreen(navController: NavController, vm: VMAddDevice = hiltViewMode
         onDispose {
             lifecycleOwner.lifecycle.removeObserver(observer)
             vm.stopScan()
+            // also cancel any ongoing provisioning when leaving the screen
+            vm.cancelProvisioning()
+        }
+    }
+
+    // If deviceId becomes available (non-empty), show wifi dialog once
+    LaunchedEffect(ui.deviceId) {
+        if (ui.deviceId.isNotBlank()) {
+            // show dialog only if not already provisioning
+            if (!ui.provisioning) {
+                showWifiDialog = true
+            }
         }
     }
 
@@ -227,6 +259,26 @@ fun AddDeviceScreen(navController: NavController, vm: VMAddDevice = hiltViewMode
             }
         }
 
+        // WiFi config dialog shown when device identified
+        if (showWifiDialog) {
+            WifiConfigDialog(
+                onDismiss = {
+                    showWifiDialog = false
+                    // cancel provisioning when user dismisses dialog
+                    vm.cancelProvisioning()
+                    // do not clear deviceId here — keep it so user can reopen dialog later if needed
+                },
+                onConfirm = { enteredSsid, enteredPassword ->
+                    ssid = enteredSsid
+                    password = enteredPassword
+                    showWifiDialog = false
+                    // Trigger provisioning via VM
+                    vm.connectWifi(ssid, password)
+                },
+                provisioning = ui.provisioning
+            )
+        }
+
         // Error dialog (keeps existing behavior)
         ErrorDialog(
             show = ui.error != null,
@@ -252,6 +304,136 @@ private fun DeviceRow(device: MDeviceConfigBle, onClick: () -> Unit) {
                 Text(text = device.bleAddress ?: "", style = MaterialTheme.typography.bodyMedium)
             }
             Text(text = "RSSI: ${device.rssi}")
+        }
+    }
+}
+
+
+@Composable
+private fun WifiConfigDialog(
+    onDismiss: () -> Unit,
+    onConfirm: (ssid: String, password: String) -> Unit,
+    provisioning: Boolean = false
+) {
+    val focusManager = LocalFocusManager.current
+    val keyboardController = LocalSoftwareKeyboardController.current
+
+    var ssid by remember { mutableStateOf("") }
+    var password by remember { mutableStateOf("") }
+
+    BaseDialog(
+        onDismiss = onDismiss,
+        position = org.thingai.android.app.meo.ui.shared.custom.DialogPosition.BOTTOM,
+        properties = androidx.compose.ui.window.DialogProperties(usePlatformDefaultWidth = false),
+        modifier = Modifier.padding(8.dp)
+    ) {
+        Surface(
+            shape = androidx.compose.foundation.shape.RoundedCornerShape(16.dp),
+            color = MaterialTheme.colorScheme.surface,
+            shadowElevation = 8.dp,
+        ) {
+            Column(
+                modifier = Modifier
+                    .padding(top = 32.dp, start = 16.dp, end = 16.dp, bottom = 16.dp)
+                    .fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(12.dp)
+            ) {
+                // Title + Close
+                Box(
+                    modifier = Modifier.fillMaxWidth(),
+                    contentAlignment = Alignment.CenterEnd
+                ) {
+                    val focusManager = LocalFocusManager.current
+                    val keyboardController = LocalSoftwareKeyboardController.current
+                    Text(
+                        text = "Configure Wi‑Fi",
+                        style = MaterialTheme.typography.titleLarge.copy(fontWeight = FontWeight.Bold),
+                        color = MaterialTheme.colorScheme.onSurface,
+                        modifier = Modifier.align(Alignment.CenterStart)
+                    )
+                    IconButton(
+                        onClick = {
+                            focusManager.clearFocus()
+                            keyboardController?.hide()
+                            onDismiss()
+                        }
+                    ) {
+                        Icon(
+                            imageVector = Icons.Filled.Close,
+                            contentDescription = "Close"
+                        )
+                    }
+                }
+
+                // SSID field styled like auth screens
+                OutlinedTextField(
+                    value = ssid,
+                    onValueChange = { ssid = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    shape = MaterialTheme.shapes.large,
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.Wifi,
+                            contentDescription = "ssid",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    placeholder = { Text("Enter SSID") }
+                )
+
+                // Password field styled like auth screens with visibility toggle
+                var showPassword by remember { mutableStateOf(false) }
+                OutlinedTextField(
+                    value = password,
+                    onValueChange = { password = it },
+                    modifier = Modifier.fillMaxWidth(),
+                    singleLine = true,
+                    shape = MaterialTheme.shapes.large,
+                    leadingIcon = {
+                        Icon(
+                            imageVector = Icons.Filled.Lock,
+                            contentDescription = "password",
+                            tint = MaterialTheme.colorScheme.onSurfaceVariant
+                        )
+                    },
+                    placeholder = { Text("Enter password") },
+                    visualTransformation = if (showPassword) VisualTransformation.None else PasswordVisualTransformation(),
+                    trailingIcon = {
+                        IconButton(onClick = { showPassword = !showPassword }) {
+                            Icon(
+                                imageVector = if (showPassword) Icons.Filled.VisibilityOff else Icons.Filled.Visibility,
+                                contentDescription = "Toggle password visibility"
+                            )
+                        }
+                    },
+                    keyboardOptions = KeyboardOptions(keyboardType = KeyboardType.Password, imeAction = ImeAction.Done)
+                )
+
+                if (provisioning) {
+                    Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.Center) {
+                        CircularProgressIndicator()
+                    }
+                }
+
+                Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.spacedBy(12.dp)) {
+                    Button(onClick = {
+                        focusManager.clearFocus()
+                        keyboardController?.hide()
+                        onDismiss()
+                    }, modifier = Modifier.weight(1f)) {
+                        Text("Cancel")
+                    }
+                    Button(onClick = {
+                        // clear focus and hide keyboard before confirm
+                        focusManager.clearFocus()
+                        keyboardController?.hide()
+                        onConfirm(ssid, password)
+                    }, modifier = Modifier.weight(1f)) {
+                        Text("Connect")
+                    }
+                }
+            }
         }
     }
 }
