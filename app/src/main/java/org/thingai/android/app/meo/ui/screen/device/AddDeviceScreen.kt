@@ -115,137 +115,127 @@ fun AddDeviceScreen(navController: NavController, vm: VMAddDevice = hiltViewMode
         }
     }
 
-    Scaffold(
-        topBar = {
-            BaseTopAppBar(
-                title = "Add Device",
-                onBack = { navController.popBackStack() }
-            )
-        }
-    ) { padding ->
-        Box(modifier = Modifier
-            .fillMaxSize()
-            .padding(padding)) {
-
-            Column(modifier = Modifier.fillMaxSize().padding(16.dp)) {
-                Spacer(modifier = Modifier.height(4.dp))
-
-                // Scanner controls — start will show dialog if requirements missing
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text(text = if (ui.scanning) "Scanning..." else "Not scanning", style = MaterialTheme.typography.titleMedium)
-                    Spacer(modifier = Modifier.width(8.dp))
-                    if (ui.scanning) {
-                        CircularProgressIndicator(modifier = Modifier.size(20.dp))
-                    }
-                    Spacer(modifier = Modifier.weight(1f))
-                    Button(onClick = {
-                        // On Start: check requirements and either show dialog or start
-                        if (!permissionGranted) {
-                            currentRequirement = RequirementType.PERMISSION
-                            showRequirementDialog = true
-                            return@Button
-                        }
-                        if (!bluetoothEnabled) {
-                            currentRequirement = RequirementType.BLUETOOTH
-                            showRequirementDialog = true
-                            return@Button
-                        }
-                        if (!locationEnabled) {
-                            currentRequirement = RequirementType.LOCATION
-                            showRequirementDialog = true
-                            return@Button
-                        }
-                        // all good -> toggle scanning
-                        if (ui.scanning) vm.stopScan() else vm.startScan()
-                    }) {
-                        Text(if (ui.scanning) "Stop" else "Start")
-                    }
+    Column() {
+        BaseTopAppBar(
+            title = "Add Device",
+            onBack = { navController.popBackStack() }
+        )
+        Column(modifier = Modifier.fillMaxSize().padding(horizontal = 16.dp)) {
+            // Scanner controls — start will show dialog if requirements missing
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(text = if (ui.scanning) "Scanning..." else "Not scanning", style = MaterialTheme.typography.titleMedium)
+                Spacer(modifier = Modifier.width(8.dp))
+                if (ui.scanning) {
+                    CircularProgressIndicator(modifier = Modifier.size(20.dp))
                 }
-
-                Spacer(modifier = Modifier.height(16.dp))
-
-                Text(text = "Discovered devices:", style = MaterialTheme.typography.titleSmall)
-                Spacer(modifier = Modifier.height(8.dp))
-
-                if (ui.devices.isEmpty()) {
-                    Text(text = "No devices found yet")
-                } else {
-                    LazyColumn(modifier = Modifier.fillMaxSize()) {
-                        items(ui.devices) { device ->
-                            DeviceRow(device) { vm.connectToDevice(device) }
-                        }
+                Spacer(modifier = Modifier.weight(1f))
+                Button(onClick = {
+                    // On Start: check requirements and either show dialog or start
+                    if (!permissionGranted) {
+                        currentRequirement = RequirementType.PERMISSION
+                        showRequirementDialog = true
+                        return@Button
                     }
+                    if (!bluetoothEnabled) {
+                        currentRequirement = RequirementType.BLUETOOTH
+                        showRequirementDialog = true
+                        return@Button
+                    }
+                    if (!locationEnabled) {
+                        currentRequirement = RequirementType.LOCATION
+                        showRequirementDialog = true
+                        return@Button
+                    }
+                    // all good -> toggle scanning
+                    if (ui.scanning) vm.stopScan() else vm.startScan()
+                }) {
+                    Text(if (ui.scanning) "Stop" else "Start")
                 }
             }
 
-            // Requirement dialog shown on Start if missing
-            val req = currentRequirement
-            if (showRequirementDialog && req != null) {
-                when (req) {
-                    RequirementType.PERMISSION -> {
-                        ConfirmDialog(
-                            show = true,
-                            title = "Permissions required",
-                            message = "Bluetooth scan or location permission is required to discover devices.",
-                            onDismiss = { showRequirementDialog = false; currentRequirement = null },
-                            onConfirm = {
-                                // Request permissions
-                                val perms = mutableListOf<String>()
-                                perms.add(Manifest.permission.ACCESS_FINE_LOCATION)
-                                perms.add(Manifest.permission.BLUETOOTH_SCAN)
-                                permissionLauncher.launch(perms.toTypedArray())
-                                showRequirementDialog = false
-                                currentRequirement = null
-                            },
-                            confirmText = "Grant",
-                            cancelText = "Cancel"
-                        )
-                    }
-                    RequirementType.BLUETOOTH -> {
-                        ConfirmDialog(
-                            show = true,
-                            title = "Bluetooth is off",
-                            message = "Please enable Bluetooth to discover devices.",
-                            onDismiss = { showRequirementDialog = false; currentRequirement = null },
-                            onConfirm = {
-                                val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
-                                context.startActivity(intent)
-                                showRequirementDialog = false
-                                currentRequirement = null
-                            },
-                            confirmText = "Open settings",
-                            cancelText = "Cancel"
-                        )
-                    }
-                    RequirementType.LOCATION -> {
-                        ConfirmDialog(
-                            show = true,
-                            title = "Location is off",
-                            message = "Please enable location services to discover devices on this device.",
-                            onDismiss = { showRequirementDialog = false; currentRequirement = null },
-                            onConfirm = {
-                                val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
-                                context.startActivity(intent)
-                                showRequirementDialog = false
-                                currentRequirement = null
-                            },
-                            confirmText = "Open settings",
-                            cancelText = "Cancel"
-                        )
+            Spacer(modifier = Modifier.height(16.dp))
+
+            Text(text = "Discovered devices:", style = MaterialTheme.typography.titleSmall)
+            Spacer(modifier = Modifier.height(8.dp))
+
+            if (ui.devices.isEmpty()) {
+                Text(text = "No devices found yet")
+            } else {
+                LazyColumn(modifier = Modifier.fillMaxSize()) {
+                    items(ui.devices) { device ->
+                        DeviceRow(device) { vm.connectToDevice(device) }
                     }
                 }
             }
-
-            // Error dialog (keeps existing behavior)
-            ErrorDialog(
-                show = ui.error != null,
-                title = "Error",
-                message = ui.error,
-                onDismiss = {
-                    vm.clearError()
-                }
-            )
         }
+
+        // Requirement dialog shown on Start if missing
+        val req = currentRequirement
+        if (showRequirementDialog && req != null) {
+            when (req) {
+                RequirementType.PERMISSION -> {
+                    ConfirmDialog(
+                        show = true,
+                        title = "Permissions required",
+                        message = "Bluetooth scan or location permission is required to discover devices.",
+                        onDismiss = { showRequirementDialog = false; currentRequirement = null },
+                        onConfirm = {
+                            // Request permissions
+                            val perms = mutableListOf<String>()
+                            perms.add(Manifest.permission.ACCESS_FINE_LOCATION)
+                            perms.add(Manifest.permission.BLUETOOTH_SCAN)
+                            permissionLauncher.launch(perms.toTypedArray())
+                            showRequirementDialog = false
+                            currentRequirement = null
+                        },
+                        confirmText = "Grant",
+                        cancelText = "Cancel"
+                    )
+                }
+                RequirementType.BLUETOOTH -> {
+                    ConfirmDialog(
+                        show = true,
+                        title = "Bluetooth is off",
+                        message = "Please enable Bluetooth to discover devices.",
+                        onDismiss = { showRequirementDialog = false; currentRequirement = null },
+                        onConfirm = {
+                            val intent = Intent(Settings.ACTION_BLUETOOTH_SETTINGS)
+                            context.startActivity(intent)
+                            showRequirementDialog = false
+                            currentRequirement = null
+                        },
+                        confirmText = "Open settings",
+                        cancelText = "Cancel"
+                    )
+                }
+                RequirementType.LOCATION -> {
+                    ConfirmDialog(
+                        show = true,
+                        title = "Location is off",
+                        message = "Please enable location services to discover devices on this device.",
+                        onDismiss = { showRequirementDialog = false; currentRequirement = null },
+                        onConfirm = {
+                            val intent = Intent(Settings.ACTION_LOCATION_SOURCE_SETTINGS)
+                            context.startActivity(intent)
+                            showRequirementDialog = false
+                            currentRequirement = null
+                        },
+                        confirmText = "Open settings",
+                        cancelText = "Cancel"
+                    )
+                }
+            }
+        }
+
+        // Error dialog (keeps existing behavior)
+        ErrorDialog(
+            show = ui.error != null,
+            title = "Error",
+            message = ui.error,
+            onDismiss = {
+                vm.clearError()
+            }
+        )
     }
 }
 

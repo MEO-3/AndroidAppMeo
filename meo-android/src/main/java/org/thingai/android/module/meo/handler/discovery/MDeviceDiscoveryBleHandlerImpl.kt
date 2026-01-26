@@ -144,10 +144,10 @@ class MDeviceDiscoveryBleHandlerImpl(
                 }
                 val deviceInfo = MDeviceInfo()
                 deviceInfo.deviceType = MDeviceType.CUSTOM
-                deviceInfo.productId = ByteUtils.bytesToString(bleSession!!.read(MBleUuid.CH_UUID_PRODUCT_ID))
-                deviceInfo.model = ByteUtils.bytesToString(bleSession!!.read(MBleUuid.CH_UUID_DEV_MODEL))
-                deviceInfo.macAddress = ByteUtils.bytesToString(bleSession!!.read(MBleUuid.CH_UUID_MAC_ADDR))
-                deviceInfo.buildInfo = ByteUtils.bytesToString(bleSession!!.read(MBleUuid.CH_UUID_BUILD_INFO))
+                deviceInfo.productId = ByteUtils.byteToUtf8String(bleSession!!.read(MBleUuid.CH_UUID_PRODUCT_ID))
+                deviceInfo.model = ByteUtils.byteToUtf8String(bleSession!!.read(MBleUuid.CH_UUID_DEV_MODEL))
+                deviceInfo.macAddress = ByteUtils.byteToHexString(bleSession!!.read(MBleUuid.CH_UUID_MAC_ADDR))
+                deviceInfo.buildInfo = ByteUtils.byteToUtf8String(bleSession!!.read(MBleUuid.CH_UUID_BUILD_INFO))
 
                 ILog.d(TAG, "connectAndIdentifyDevice", deviceInfo.macAddress, deviceInfo.buildInfo)
                 setupDeviceCallback.onDeviceIdentifiedAndReady(deviceInfo)
