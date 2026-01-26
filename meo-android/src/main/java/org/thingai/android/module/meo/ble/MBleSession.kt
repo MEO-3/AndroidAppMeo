@@ -10,4 +10,5 @@ interface MBleSession {
     suspend fun write(uuid: UUID, value: ByteArray, withResponse: Boolean = true): ByteArray
     fun notifications(uuid: UUID): Flow<ByteArray>
     suspend fun close()
+    suspend fun open()
 }

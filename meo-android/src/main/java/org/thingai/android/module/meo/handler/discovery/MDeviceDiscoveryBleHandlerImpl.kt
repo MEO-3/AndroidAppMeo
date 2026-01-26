@@ -40,7 +40,20 @@ class MDeviceDiscoveryBleHandlerImpl(
         p1: String?,
         p2: RequestCallback<Boolean?>?
     ) {
-        TODO("Not yet implemented")
+        scope.launch {
+            try {
+                bleSession?.write(
+                    MBleUuid.CH_UUID_WIFI_SSID,
+                    p0!!.toByteArray()
+                )
+                bleSession?.write (MBleUuid.CH_UUID_WIFI_PASS, p1!!.toByteArray())
+                p2?.onSuccess(true, "Connected to Wi-Fi")
+            } catch (t: Throwable) {
+                ILog.e(TAG, "connectWifi error: ${t.message}")
+                p2?.onFailure(2, "Unable to connect to Wi-Fi")
+            }
+        }
+
     }
 
     override fun discovery(): Boolean {
@@ -172,12 +185,5 @@ class MDeviceDiscoveryBleHandlerImpl(
         p1: RequestCallback<MDevice?>?
     ) {
         TODO("Not yet implemented")
-    }
-
-    fun cancelProvisioning() {
-        scope.launch {
-            bleSession?.close()
-            bleSession = null
-        }
     }
 }

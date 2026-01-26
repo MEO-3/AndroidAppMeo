@@ -25,6 +25,7 @@ import androidx.navigation.NavController
 import org.thingai.android.app.meo.ui.shared.appbar.BaseTopAppBar
 import org.thingai.android.app.meo.ui.shared.dialog.ConfirmDialog
 import org.thingai.android.app.meo.ui.shared.dialog.ErrorDialog
+import org.thingai.android.app.meo.ui.shared.dialog.LoadingDialog
 import org.thingai.android.app.meo.ui.viewmodel.device.VMAddDevice
 import org.thingai.meo.common.entity.device.MDeviceConfigBle
 import androidx.core.content.ContextCompat
@@ -133,7 +134,6 @@ fun AddDeviceScreen(navController: NavController, vm: VMAddDevice = hiltViewMode
             lifecycleOwner.lifecycle.removeObserver(observer)
             vm.stopScan()
             // also cancel any ongoing provisioning when leaving the screen
-            vm.cancelProvisioning()
         }
     }
 
@@ -265,8 +265,6 @@ fun AddDeviceScreen(navController: NavController, vm: VMAddDevice = hiltViewMode
                 onDismiss = {
                     showWifiDialog = false
                     // cancel provisioning when user dismisses dialog
-                    vm.cancelProvisioning()
-                    // do not clear deviceId here — keep it so user can reopen dialog later if needed
                 },
                 onConfirm = { enteredSsid, enteredPassword ->
                     ssid = enteredSsid
@@ -278,6 +276,14 @@ fun AddDeviceScreen(navController: NavController, vm: VMAddDevice = hiltViewMode
                 provisioning = ui.provisioning
             )
         }
+
+        // Show loading dialog while connecting and identifying the device
+        LoadingDialog(
+            show = ui.connecting,
+            message = "Connecting to device…",
+            cancellable = false,
+            onDismiss = { /* no-op, not cancellable */ }
+        )
 
         // Error dialog (keeps existing behavior)
         ErrorDialog(

@@ -73,6 +73,11 @@ class MBleSessionImpl(
         }
     }
 
+    override suspend fun open() {
+        close()
+        connect()
+    }
+
     // Reads a characteristic as ByteArray
     @SuppressLint("MissingPermission")
     override suspend fun read(uuid: UUID): ByteArray {
