@@ -144,32 +144,41 @@ class MDeviceDiscoveryBleHandlerImpl(
         p1: RequestCallback<MDeviceInfo>?
     ) {
         scope.launch {
-            bleSession?.close()
-            bleSession = bleClient.connect(p0!!.bleAddress)
-            bleSession!!.isConnected.collect { isConnected ->
-                if (!isConnected) {
-                    ILog.d(TAG, "connectAndIdentifyDevice: $isConnected")
-                    p1?.onFailure(2, "Unable to connect to device")
-                    setupDeviceCallback.onSetupFailed(2, "Unable to connect to device")
-                    bleSession?.close()
-                    bleSession = null
-                    return@collect
+            try {
+                bleSession?.close()
+                bleSession = bleClient.connect(p0!!.bleAddress)
+                bleSession!!.isConnected.collect { isConnected ->
+                    if (!isConnected) {
+                        ILog.d(TAG, "connectAndIdentifyDevice: $isConnected")
+                        p1?.onFailure(2, "Unable to connect to device")
+                        setupDeviceCallback.onSetupFailed(2, "Unable to connect to device")
+                        bleSession?.close()
+                        bleSession = null
+                        return@collect
+                    }
+                    val deviceInfo = MDeviceInfo()
+                    deviceInfo.deviceType = MDeviceType.CUSTOM
+                    deviceInfo.productId = ByteUtils.byteToUtf8String(bleSession!!.read(MBleUuid.CH_UUID_PRODUCT_ID))
+                    deviceInfo.model = ByteUtils.byteToUtf8String(bleSession!!.read(MBleUuid.CH_UUID_DEV_MODEL))
+                    deviceInfo.macAddress = ByteUtils.byteToHexString(bleSession!!.read(MBleUuid.CH_UUID_MAC_ADDR))
+                    deviceInfo.buildInfo = ByteUtils.byteToUtf8String(bleSession!!.read(MBleUuid.CH_UUID_BUILD_INFO))
+
+                    ILog.d(TAG, "connectAndIdentifyDevice", deviceInfo.macAddress, deviceInfo.buildInfo)
+                    setupDeviceCallback.onDeviceIdentifiedAndReady(deviceInfo)
+
+                    p1?.onSuccess(
+                        deviceInfo,
+                        "Connected to device"
+                    )
                 }
-                val deviceInfo = MDeviceInfo()
-                deviceInfo.deviceType = MDeviceType.CUSTOM
-                deviceInfo.productId = ByteUtils.byteToUtf8String(bleSession!!.read(MBleUuid.CH_UUID_PRODUCT_ID))
-                deviceInfo.model = ByteUtils.byteToUtf8String(bleSession!!.read(MBleUuid.CH_UUID_DEV_MODEL))
-                deviceInfo.macAddress = ByteUtils.byteToHexString(bleSession!!.read(MBleUuid.CH_UUID_MAC_ADDR))
-                deviceInfo.buildInfo = ByteUtils.byteToUtf8String(bleSession!!.read(MBleUuid.CH_UUID_BUILD_INFO))
-
-                ILog.d(TAG, "connectAndIdentifyDevice", deviceInfo.macAddress, deviceInfo.buildInfo)
-                setupDeviceCallback.onDeviceIdentifiedAndReady(deviceInfo)
-
-                p1?.onSuccess(
-                    deviceInfo,
-                    "Connected to device"
-                )
+            } catch (e: Exception) {
+                ILog.e(TAG, "connectAndIdentifyDevice error: ${e.message}")
+                p1?.onFailure(2, "Unable to connect to device")
+                setupDeviceCallback.onSetupFailed(2, "Unable to connect to device")
+                bleSession?.close()
+                bleSession = null
             }
+
         }
     }
 
