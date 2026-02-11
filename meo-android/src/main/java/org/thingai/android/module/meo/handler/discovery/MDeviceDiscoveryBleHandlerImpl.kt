@@ -8,11 +8,13 @@ import kotlinx.coroutines.launch
 import org.thingai.android.module.meo.ble.MBleClient
 import org.thingai.android.module.meo.ble.MBleScanCallback
 import org.thingai.android.module.meo.ble.MBleSession
+import org.thingai.android.module.meo.cloud.CloudApiClient
 import org.thingai.android.module.meo.util.ByteUtils
 import org.thingai.base.log.ILog
 import org.thingai.meo.common.ble.MBleUuid
 import org.thingai.meo.common.callback.RequestCallback
 import org.thingai.meo.common.define.MDeviceType
+import org.thingai.meo.common.dto.device.RequestDeviceUpsert
 import org.thingai.meo.common.entity.device.MDevice
 import org.thingai.meo.common.entity.device.MDeviceConfigBle
 import org.thingai.meo.common.entity.device.MDeviceInfo
@@ -20,7 +22,8 @@ import org.thingai.meo.common.entity.info.MWifiInfo
 import org.thingai.meo.common.handler.MDeviceDiscoveryHandlerBle
 
 class MDeviceDiscoveryBleHandlerImpl(
-    private val bleClient: MBleClient
+    private val bleClient: MBleClient,
+    private val cloudClient: CloudApiClient
 ): MDeviceDiscoveryHandlerBle() {
     private val TAG = "MDeviceDiscoveryBleHandler"
 
@@ -193,6 +196,7 @@ class MDeviceDiscoveryBleHandlerImpl(
         p0: String?,
         p1: RequestCallback<MDevice?>?
     ) {
+        val request = RequestDeviceUpsert()
         TODO("Not yet implemented")
     }
 }

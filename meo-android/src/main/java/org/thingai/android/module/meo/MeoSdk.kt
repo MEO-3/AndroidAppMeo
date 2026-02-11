@@ -8,7 +8,8 @@ import kotlinx.coroutines.withContext
 import okhttp3.OkHttpClient
 import org.thingai.android.module.meo.ble.impl.MBleClientImpl
 import org.thingai.android.module.meo.handler.auth.AuthHandler
-import org.thingai.android.module.meo.cloud.AuthApi
+import org.thingai.android.module.meo.cloud.ApiAuth
+import org.thingai.android.module.meo.cloud.CloudApiClient
 import org.thingai.android.module.meo.handler.auth.internal.AuthInterceptor
 import org.thingai.android.module.meo.handler.auth.internal.AuthPrefs
 import org.thingai.android.module.meo.handler.auth.internal.TokenAuthenticator
@@ -26,7 +27,8 @@ class MeoSdk private constructor(
     private val TAG = "MeoSdk"
     private val BASE_CLOUD_URL = "https://iot.yirlodt.io.vn/"
 
-    private lateinit var retrofit: Retrofit
+    private lateinit var cloudApiClient: CloudApiClient
+
     private lateinit var authHandler: AuthHandler
     private lateinit var bleDiscoveryHandler: MDeviceDiscoveryHandlerBle
     private lateinit var lanDiscoveryHandler: MDeviceDiscoveryHandlerLan
@@ -35,7 +37,7 @@ class MeoSdk private constructor(
     private fun init() {
         ILog.d(TAG, "init")
 
-        // 1. Init Internal Prefs
+        // Init Internal Prefs
         val authPrefs = AuthPrefs(appContext)
 
         // Init separated auth http client to avoid deadlock on refresh
@@ -43,28 +45,28 @@ class MeoSdk private constructor(
             .addInterceptor(AuthInterceptor(authPrefs))
             .build()
 
-        // 2. Build OkHttpClient with Interceptor and Authenticator
-        val okHttpClient = OkHttpClient.Builder()
-            .addInterceptor(AuthInterceptor(authPrefs))
-            .authenticator(TokenAuthenticator({ authHandler }, authPrefs))
-            .build()
-
-        // 3. Init Retrofit
+        // Init auth Retrofit
         val authRetrofit = Retrofit.Builder()
             .baseUrl(BASE_CLOUD_URL)
             .client(authHttpClient)
             .addConverterFactory(GsonConverterFactory.create())
             .build()
 
-        retrofit = Retrofit.Builder()
-            .baseUrl(BASE_CLOUD_URL)
-            .client(okHttpClient)
-            .addConverterFactory(GsonConverterFactory.create())
-            .build()
+        // Init handlers
+        authHandler = AuthHandler(authRetrofit.create(ApiAuth::class.java), authPrefs)
 
-        // 4. Init handlers
-        authHandler = AuthHandler(authRetrofit.create(AuthApi::class.java), authPrefs)
-        bleDiscoveryHandler = MDeviceDiscoveryBleHandlerImpl(MBleClientImpl(appContext))
+        // Cloud API
+        cloudApiClient = CloudApiClient(
+            BASE_CLOUD_URL,
+            AuthInterceptor(authPrefs),
+            TokenAuthenticator({ authHandler }, authPrefs)
+        )
+        cloudApiClient.init()
+
+        bleDiscoveryHandler = MDeviceDiscoveryBleHandlerImpl(
+            MBleClientImpl(appContext),
+            cloudApiClient
+        )
 
         instance = this
     }

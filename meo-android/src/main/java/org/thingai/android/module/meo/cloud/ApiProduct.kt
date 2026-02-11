@@ -6,7 +6,7 @@ import retrofit2.Response
 import retrofit2.http.Body
 import retrofit2.http.POST
 
-interface ProductApi {
+interface ApiProduct {
     @POST("/api/v1/products/{orgCode}/products")
     suspend fun createProduct(@Body requestBody: RequestProductUpsert): Response<ResponseProductRead>
 }

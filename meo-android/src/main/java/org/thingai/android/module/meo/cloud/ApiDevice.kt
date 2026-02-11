@@ -11,7 +11,7 @@ import retrofit2.http.POST
 import retrofit2.http.PUT
 import retrofit2.http.Path
 
-interface DeviceApi {
+interface ApiDevice {
     @POST("/api/v1/devices")
     suspend fun createDevice(@Body requestBody: RequestDeviceUpsert): Response<ResponseDevice>
 

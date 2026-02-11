@@ -1,7 +1,7 @@
 package org.thingai.android.module.meo.handler.auth
 
 import com.google.gson.Gson
-import org.thingai.android.module.meo.cloud.AuthApi
+import org.thingai.android.module.meo.cloud.ApiAuth
 import org.thingai.android.module.meo.handler.auth.internal.AuthPrefs
 import org.thingai.base.log.ILog
 import org.thingai.meo.common.define.MOtpPurpose
@@ -17,7 +17,7 @@ import org.thingai.meo.common.dto.otp.RequestOtpVerify
 import retrofit2.Response
 
 class AuthHandler internal constructor(
-    private val api: AuthApi,
+    private val api: ApiAuth,
     private val prefs: AuthPrefs
 ) {
     private val TAG = "AuthHandler"
