@@ -13,6 +13,7 @@ import org.thingai.android.module.meo.util.ByteUtils
 import org.thingai.base.log.ILog
 import org.thingai.meo.common.ble.MBleUuid
 import org.thingai.meo.common.callback.RequestCallback
+import org.thingai.meo.common.define.MConnectionType
 import org.thingai.meo.common.define.MDeviceType
 import org.thingai.meo.common.dto.device.RequestDeviceUpsert
 import org.thingai.meo.common.entity.device.MDevice
@@ -30,6 +31,7 @@ class MDeviceDiscoveryBleHandlerImpl(
     private val scope: CoroutineScope = CoroutineScope(SupervisorJob() + Dispatchers.IO)
     private var bleSession: MBleSession? = null
     private var scanJob: Job? = null
+    private var connectedDeviceBuffer: MDeviceInfo? = null
 
     // Keep track of seen device addresses so we only notify once per device
     private val seenAddresses = mutableSetOf<String>()
@@ -165,6 +167,7 @@ class MDeviceDiscoveryBleHandlerImpl(
                     deviceInfo.model = ByteUtils.byteToUtf8String(bleSession!!.read(MBleUuid.CH_UUID_DEV_MODEL))
                     deviceInfo.macAddress = ByteUtils.byteToHexString(bleSession!!.read(MBleUuid.CH_UUID_MAC_ADDR))
                     deviceInfo.buildInfo = ByteUtils.byteToUtf8String(bleSession!!.read(MBleUuid.CH_UUID_BUILD_INFO))
+                    deviceInfo.connectionType = MConnectionType.BLE
 
                     ILog.d(TAG, "connectAndIdentifyDevice", deviceInfo.macAddress, deviceInfo.buildInfo)
                     setupDeviceCallback.onDeviceIdentifiedAndReady(deviceInfo)
@@ -196,7 +199,40 @@ class MDeviceDiscoveryBleHandlerImpl(
         p0: String?,
         p1: RequestCallback<MDevice?>?
     ) {
-        val request = RequestDeviceUpsert()
-        TODO("Not yet implemented")
+        if (connectedDeviceBuffer == null) {
+            p1?.onFailure(2, "Device not connected")
+            return
+        }
+
+        scope.launch {
+            if (setupDevice()) {
+                val request = RequestDeviceUpsert()
+                request.label = p0
+                request.macAddress = connectedDeviceBuffer!!.macAddress
+                request.productId = connectedDeviceBuffer!!.productId
+                request.model = connectedDeviceBuffer!!.model
+                request.deviceType = connectedDeviceBuffer!!.deviceType
+                request.connectionType = connectedDeviceBuffer!!.connectionType
+
+                val response = cloudClient.deviceApi().createDevice(request)
+                if (response.isSuccessful) {
+                    val device = MDevice()
+                    device.label = response.body()!!.label
+                    device.productId = response.body()!!.productId
+                    device.id = response.body()!!.id
+
+                    p1?.onSuccess(device, "Device synced to cloud")
+                } else {
+                    p1?.onFailure(2, "Unable to sync device to cloud")
+                }
+            } else {
+                p1?.onFailure(2, "Unable to setup device")
+            }
+        }
+    }
+
+    private fun setupDevice(): Boolean {
+        // TODO("Not yet implemented")
+        return false
     }
 }
