@@ -205,34 +205,47 @@ class MDeviceDiscoveryBleHandlerImpl(
         }
 
         scope.launch {
-            if (setupDevice()) {
-                val request = RequestDeviceUpsert()
-                request.label = p0
-                request.macAddress = connectedDeviceBuffer!!.macAddress
-                request.productId = connectedDeviceBuffer!!.productId
-                request.model = connectedDeviceBuffer!!.model
-                request.deviceType = connectedDeviceBuffer!!.deviceType
-                request.connectionType = connectedDeviceBuffer!!.connectionType
+            val request = RequestDeviceUpsert()
+            request.label = p0
+            request.macAddress = connectedDeviceBuffer!!.macAddress
+            request.productId = connectedDeviceBuffer!!.productId
+            request.model = connectedDeviceBuffer!!.model
+            request.deviceType = connectedDeviceBuffer!!.deviceType
+            request.connectionType = connectedDeviceBuffer!!.connectionType
 
-                val response = cloudClient.deviceApi().createDevice(request)
-                if (response.isSuccessful) {
-                    val device = MDevice()
-                    device.label = response.body()!!.label
-                    device.productId = response.body()!!.productId
-                    device.id = response.body()!!.id
+            val response = cloudClient.deviceApi().createDevice(request)
+            if (response.isSuccessful) {
+                val device = MDevice()
+                device.label = response.body()!!.label
+                device.productId = response.body()!!.productId
+                device.id = response.body()!!.id
 
+                val userId = response.body()!!.userId
+                val deviceId = response.body()!!.id
+
+                if (setupDevice(userId, deviceId)) {
                     p1?.onSuccess(device, "Device synced to cloud")
                 } else {
                     p1?.onFailure(2, "Unable to sync device to cloud")
                 }
             } else {
-                p1?.onFailure(2, "Unable to setup device")
+                p1?.onFailure(2, "Unable to sync device to cloud")
             }
+            connectedDeviceBuffer = null
+            if (bleSession != null) bleSession!!.close()
         }
     }
 
-    private fun setupDevice(): Boolean {
-        // TODO("Not yet implemented")
-        return false
+    private suspend fun setupDevice(userId: String, deviceId: String): Boolean {
+        if (bleSession == null) return false
+
+        try {
+            bleSession!!.write(MBleUuid.CH_UUID_USER_ID, userId.toByteArray())
+            bleSession!!.write(MBleUuid.CH_UUID_DEV_ID, deviceId.toByteArray())
+        } catch (t: Throwable) {
+            ILog.e(TAG, "setupDevice error: ${t.message}")
+        }
+
+        return true
     }
 }
